@@ -1,8 +1,12 @@
-# Discord Crypto Degen Tool
+# Discord Crypto Degen Tool 🤖📈
+
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 A Discord bot that automatically detects cryptocurrency contract addresses in messages and responds with detailed token information from DexScreener API.
 
-## Features
+## 🌟 Features
 
 - 🔍 Automatic token detection from contract addresses (e.g., 0x1234567890abcdef...)
 - 📊 Rich embeds with market data, liquidity, volume, and price changes
@@ -10,33 +14,40 @@ A Discord bot that automatically detects cryptocurrency contract addresses in me
 - 💹 Real-time data from DexScreener
 - 🌐 Multi-chain support
 
-## Setup
-
-### Prerequisites
+## 📋 Prerequisites
 
 - Docker and Docker Compose
 - Discord Bot Token
 
-### Installation
+## 🚀 Quick Start
 
-1. Clone or download this repository
-2. Copy `.env.example` to `.env` and add your Discord bot token:
+### Option 1: Docker Deployment (Recommended)
+
+1. **Clone or download this repository**
+2. **Update configuration**
+   ```bash
+   # Copy the example env file and edit with your Discord bot token
+   cp .env.example .env
+   nano .env  # Add TOKEN=your_discord_bot_token_here
    ```
-   TOKEN=your_discord_bot_token_here
-   ```
-3. Run with Docker Compose:
+3. **Build and run with Docker Compose**
    ```bash
    docker-compose up -d
    ```
+4. **View logs**
+   ```bash
+   docker-compose logs -f
+   ```
 
-### Local Development
+### Option 2: Local Node.js Deployment
 
-1. Install dependencies:
+1. **Clone or download this repository**
+2. **Install dependencies**
    ```bash
    npm install
    ```
-2. Copy `.env.example` to `.env` and add your token
-3. Run the bot:
+3. **Update .env with your Discord bot token**
+4. **Run the bot**
    ```bash
    npm start
    ```
@@ -45,36 +56,32 @@ A Discord bot that automatically detects cryptocurrency contract addresses in me
    npm run dev
    ```
 
-## Usage
+## 📊 Usage
 
 The bot will automatically respond to messages containing:
 - Contract addresses (e.g., `0x1234567890abcdef...`)
 
 It displays formatted embeds with token information and a button to copy the contract address.
 
-## Docker Commands
+## 🐳 Docker Commands
 
 - Start: `docker-compose up -d`
 - Stop: `docker-compose down`
 - Logs: `docker-compose logs -f`
 - Rebuild: `docker-compose up -d --build`
 
-## Troubleshooting
+## 🐛 Troubleshooting
 
 ### Docker Build Issues
 
 If you encounter Docker Hub authentication errors (500 Internal Server Error), try these solutions:
 
 1. **Wait and retry**: Docker Hub issues are usually temporary
-2. **Pull the base image first**:
-   ```bash
-   docker pull node:18.19-alpine3.19
-   ```
-3. **Build with different options**:
+2. **Build with different options**:
    ```bash
    docker-compose build --no-cache --pull
    ```
-4. **Use alternative networks**:
+3. **Use alternative networks**:
    ```bash
    docker build --network host .
    ```
@@ -86,6 +93,22 @@ If the Alpine image continues to fail, you can modify the Dockerfile to use:
 - `node:18-bullseye-slim` (Debian Bullseye)
 - A specific image digest for stability
 
-## License
+## 📄 License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Discord.js](https://discord.js.org/) for Discord API integration
+- [DexScreener](https://dexscreener.com/) for token data API
+- [Node Fetch](https://github.com/node-fetch/node-fetch) for HTTP requests
+
+## 📧 Contact
+
+**Repository**: [https://github.com/imamfahrudin/discord-crypto-degen-tool](https://github.com/imamfahrudin/discord-crypto-degen-tool)
+
+**Issues**: [Report a bug or request a feature](https://github.com/imamfahrudin/discord-crypto-degen-tool/issues)
+
+---
+
+Made with ❤️ for the crypto community
