@@ -19,9 +19,6 @@ RUN npm config set fetch-retry-mintimeout 20000 && \
     npm install --omit=dev --no-audit --no-fund && \
     npm cache clean --force
 
-# Add Web API polyfills for undici compatibility
-RUN node -e "global.ReadableStream = require('stream/web').ReadableStream; global.TransformStream = require('stream/web').TransformStream;"
-
 # Copy application code
 COPY . .
 
