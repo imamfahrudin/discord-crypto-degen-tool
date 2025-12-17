@@ -6,10 +6,10 @@
 
 **Status**: This is a Docker Hub infrastructure issue affecting all users worldwide.
 
-## ✅ Ubuntu Server Solutions
+## ✅ Docker-Only Solutions (Ubuntu Server)
 
-### 1. Use Microsoft Container Registry (Recommended)
-The Dockerfile has been switched to use Microsoft's registry. Try building now:
+### 1. Use Microsoft Container Registry (Current Setup)
+The Dockerfile is already configured to use Microsoft's registry:
 
 ```bash
 # On your Ubuntu server
@@ -19,26 +19,44 @@ docker compose build --no-cache --pull
 docker compose up -d
 ```
 
-### 2. Ubuntu-Specific Commands
+### 2. Configure Docker Registry Mirrors
+Add alternative registries to bypass Docker Hub completely:
+
 ```bash
-# Update package lists
-sudo apt update
+# Create or edit Docker daemon config
+sudo nano /etc/docker/daemon.json
 
-# Install Docker Compose v2 (if not installed)
-sudo apt install docker-compose-v2
+# Add these mirrors:
+{
+  "registry-mirrors": [
+    "https://mirror.gcr.io",
+    "https://dockerhub.azk8s.cn",
+    "https://reg-mirror.qiniu.com"
+  ]
+}
 
-# Or use Docker Compose plugin
-sudo apt install docker-compose-plugin
-
-# Check Docker versions
-docker --version
-docker compose version
-
-# Restart Docker service
+# Restart Docker to apply changes
+sudo systemctl daemon-reload
 sudo systemctl restart docker
+
+# Then rebuild
+docker compose build --no-cache --pull
+docker compose up -d
 ```
 
-### 3. Force Clean Rebuild (Ubuntu)
+### 3. Use GitHub Container Registry Alternative
+If Microsoft registry also has issues, try GitHub's registry:
+
+```dockerfile
+# Edit Dockerfile, change first line to:
+FROM ghcr.io/puppeteer/puppeteer:19.7.2
+
+# Or use a generic Ubuntu + Node setup:
+FROM ubuntu:22.04
+RUN apt-get update && apt-get install -y nodejs npm
+```
+
+### 4. Force Clean Rebuild
 ```bash
 # Stop all containers
 docker compose down --volumes --remove-orphans
@@ -46,10 +64,13 @@ docker compose down --volumes --remove-orphans
 # Clean everything
 docker system prune -a -f
 
-# Remove all images (optional, if still failing)
+# Remove all images
 docker rmi $(docker images -q) 2>/dev/null || true
 
-# Rebuild completely
+# Restart Docker service
+sudo systemctl restart docker
+
+# Rebuild completely with verbose output
 docker compose build --no-cache --pull --progress=plain
 docker compose up -d
 
@@ -57,51 +78,127 @@ docker compose up -d
 docker compose logs -f bot
 ```
 
-### 4. Alternative: Local Node.js Installation
-If Docker continues to fail, run directly on Ubuntu:
+### 5. Try Building Without Pull Flag
+Sometimes the `--pull` flag causes issues:
 
 ```bash
-# Install Node.js 18
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# Install dependencies
-npm install
-
-# Setup environment
-cp .env.example .env
-nano .env  # Add your Discord token
-
-# Run the bot
-npm start
+docker compose build --no-cache
+docker compose up -d
 ```
 
-## 🔧 Microsoft Registry Dockerfile
+### 6. Use Docker Build with Network Mode
+```bash
+# Build with host network mode
+docker build --network host -t discord-crypto-degen-bot .
+docker compose up -d
+```
 
-The current Dockerfile uses:
+## 🔧 Alternative Dockerfile Options
+
+### If Microsoft Registry Fails
+
+**Option 1: Ubuntu Base + Manual Node.js Install**
 ```dockerfile
-FROM mcr.microsoft.com/playwright/node:18-focal
+FROM ubuntu:22.04
+
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production --no-audit --no-fund
+COPY . .
+RUN groupadd -r botuser && useradd -r -g botuser botuser && chown -R botuser:botuser /app
+USER botuser
+CMD ["npm", "start"]
 ```
 
-This registry is more reliable than Docker Hub during outages.
+**Option 2: Alpine Linux (Smallest)**
+```dockerfile
+FROM alpine:3.19
 
-## 📊 Status Monitoring
+RUN apk add --no-cache nodejs npm
 
-- **Docker Hub Status**: https://status.docker.com/
-- **Microsoft Registry**: Usually more stable
-- **Check your connection**: `curl -I https://mcr.microsoft.com`
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production --no-audit --no-fund
+COPY . .
+RUN addgroup -S botuser && adduser -S botuser -G botuser && chown -R botuser:botuser /app
+USER botuser
+CMD ["npm", "start"]
+```
 
-## 🆘 Emergency Solutions
+**Option 3: Debian Slim**
+```dockerfile
+FROM debian:bullseye-slim
 
-### If Microsoft Registry Also Fails
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
 
-1. **Use Local Node.js** (recommended for production)
-2. **Use a different VPS provider** with better Docker connectivity
-3. **Wait for Docker Hub recovery** (usually 1-24 hours)
-4. **Use alternative container registries** like GitHub Container Registry
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production --no-audit --no-fund
+COPY . .
+RUN groupadd -r botuser && useradd -r -g botuser botuser && chown -R botuser:botuser /app
+USER botuser
+CMD ["npm", "start"]
+```
 
-### Quick Local Setup
+## 🔍 Diagnostic Commands
+
 ```bash
-# One-line setup
-sudo apt update && curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - && sudo apt-get install -y nodejs && npm install && cp .env.example .env && echo "Edit .env with your Discord token, then run: npm start"
+# Check Docker daemon status
+sudo systemctl status docker
+
+# Check Docker version
+docker --version
+docker compose version
+
+# Test registry connectivity
+curl -I https://mcr.microsoft.com
+curl -I https://mirror.gcr.io
+
+# Check DNS resolution
+nslookup mcr.microsoft.com
+nslookup registry-1.docker.io
+
+# View Docker daemon logs
+sudo journalctl -u docker -n 50
+
+# Check Docker network
+docker network ls
+```
+
+## 📊 Registry Status Monitoring
+
+- **Microsoft Registry**: https://mcr.microsoft.com
+- **Docker Hub Status**: https://status.docker.com/
+- **Google Container Registry Mirror**: https://mirror.gcr.io
+
+## 🆘 Emergency Docker-Only Solutions
+
+### Multi-Stage Build Approach
+Create a custom multi-stage Dockerfile that doesn't rely on external registries:
+
+```dockerfile
+FROM scratch AS base
+# This won't work directly but shows the concept
+
+# Better: Use a local registry or cache
+# 1. Pull image on a working machine
+docker pull mcr.microsoft.com/playwright/node:18-focal
+docker save mcr.microsoft.com/playwright/node:18-focal > node-image.tar
+
+# 2. Transfer to server and load
+scp node-image.tar your-server:/tmp/
+docker load < /tmp/node-image.tar
+
+# 3. Build using the cached image
+docker compose build --no-cache
 ```
