@@ -1,8 +1,10 @@
 # Using CentOS Stream from Quay.io (Red Hat's lightweight base)
 FROM quay.io/centos/centos:stream9-minimal
 
-# Install Node.js 18.x
-RUN microdnf install -y nodejs npm && \
+# Install Node.js 18.x from NodeSource (guaranteed newer version)
+RUN microdnf install -y curl ca-certificates && \
+    curl -fsSL https://rpm.nodesource.com/setup_18.x | bash - && \
+    microdnf install -y nodejs && \
     microdnf clean all
 
 # Set working directory
