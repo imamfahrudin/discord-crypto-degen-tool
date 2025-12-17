@@ -1,6 +1,5 @@
-# Alternative Dockerfile using Microsoft Container Registry
-# Use this if Docker Hub continues to fail
-FROM mcr.microsoft.com/playwright/node:18-focal
+# Using official Node.js image from Docker Hub
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
@@ -16,16 +15,6 @@ RUN npm config set fetch-retry-mintimeout 20000 && \
 
 # Copy application code
 COPY . .
-
-# Create non-root user for security
-RUN groupadd -r botuser && useradd -r -g botuser botuser && \
-    chown -R botuser:botuser /app
-
-# Switch to non-root user
-USER botuser
-
-# Expose port (optional, for health checks)
-EXPOSE 3000
 
 # Start the application
 CMD ["npm", "start"]
