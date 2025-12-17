@@ -1,0 +1,21 @@
+{
+  "name": "discord-crypto-degen-tool",
+  "version": "1.0.0",
+  "description": "A Discord bot that fetches and displays cryptocurrency token information from DexScreener API",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "nodemon bot.js"
+  },
+  "keywords": ["discord", "bot", "crypto", "dexscreener"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "node-fetch": "^2.7.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
