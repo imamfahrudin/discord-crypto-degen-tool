@@ -1,12 +1,9 @@
-# Using Ubuntu base with Node.js installed directly
-FROM ubuntu:22.04
+# Using Fedora from Quay.io (Red Hat's registry - more reliable)
+FROM quay.io/fedora/fedora:39-x86_64
 
-# Install Node.js 18.x from NodeSource
-RUN apt-get update && \
-    apt-get install -y curl ca-certificates && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs && \
-    rm -rf /var/lib/apt/lists/*
+# Install Node.js 18.x
+RUN dnf install -y nodejs npm && \
+    dnf clean all
 
 # Set working directory
 WORKDIR /app
