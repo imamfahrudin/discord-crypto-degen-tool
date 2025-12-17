@@ -1,5 +1,12 @@
-# Using official Node.js image from Docker Hub
-FROM node:18-alpine
+# Using Ubuntu base with Node.js installed directly
+FROM ubuntu:22.04
+
+# Install Node.js 18.x from NodeSource
+RUN apt-get update && \
+    apt-get install -y curl ca-certificates && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
