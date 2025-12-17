@@ -221,7 +221,7 @@ const client = new Client({
 });
 
 // Event handlers
-client.once("ready", () => {
+client.once("clientReady", () => {
   console.log(`${CONFIG.MESSAGES.BOT_READY} ${client.user.tag}`);
 });
 
