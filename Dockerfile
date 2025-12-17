@@ -1,9 +1,6 @@
-# Use a more reliable Node.js image from a different source
-# If Docker Hub is having issues, try one of these alternatives:
-# FROM node:18-slim
-# FROM node:18-bullseye-slim
-# FROM mcr.microsoft.com/playwright/node:18-focal
-FROM node:18-slim
+# Alternative Dockerfile using Microsoft Container Registry
+# Use this if Docker Hub continues to fail
+FROM mcr.microsoft.com/playwright/node:18-focal
 
 # Set working directory
 WORKDIR /app
