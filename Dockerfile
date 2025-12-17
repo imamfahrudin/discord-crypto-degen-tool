@@ -1,9 +1,9 @@
-# Using Fedora from Quay.io (Red Hat's registry - more reliable)
-FROM quay.io/fedora/fedora:39-x86_64
+# Using CentOS Stream from Quay.io (Red Hat's lightweight base)
+FROM quay.io/centos/centos:stream9-minimal
 
 # Install Node.js 18.x
-RUN dnf install -y nodejs npm && \
-    dnf clean all
+RUN microdnf install -y nodejs npm && \
+    microdnf clean all
 
 # Set working directory
 WORKDIR /app
