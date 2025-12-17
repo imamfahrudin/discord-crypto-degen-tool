@@ -1,7 +1,7 @@
-# Using CentOS Stream from Quay.io (Red Hat's lightweight base)
-FROM quay.io/centos/centos:stream9-minimal
+# Using Red Hat Universal Base Image (UBI) from Quay.io
+FROM quay.io/redhat/ubi9/ubi-minimal:latest
 
-# Install Node.js 18.x from NodeSource (guaranteed newer version)
+# Install Node.js 18.x from NodeSource
 RUN microdnf install -y curl ca-certificates && \
     curl -fsSL https://rpm.nodesource.com/setup_18.x | bash - && \
     microdnf install -y nodejs && \
