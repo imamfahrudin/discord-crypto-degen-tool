@@ -1,3 +1,11 @@
+// Polyfills for Web APIs in Node.js environment
+if (typeof ReadableStream === 'undefined') {
+  global.ReadableStream = require('stream/web').ReadableStream;
+}
+if (typeof TransformStream === 'undefined') {
+  global.TransformStream = require('stream/web').TransformStream;
+}
+
 const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const fetch = require("node-fetch");
 require("dotenv").config();
