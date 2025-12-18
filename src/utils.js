@@ -18,6 +18,38 @@ function formatNumber(num) {
 }
 
 /**
+ * Formats numbers with commas and proper decimal places (raw format)
+ * @param {number} num - The number to format
+ * @param {number} decimals - Number of decimal places (default: auto)
+ * @returns {string} Formatted number string with commas
+ */
+function formatRawNumber(num, decimals = null) {
+  if (!num || isNaN(num)) return "N/A";
+
+  const number = Number(num);
+
+  // Auto-determine decimal places if not specified
+  if (decimals === null) {
+    if (number < 0.000001) {
+      decimals = 10;
+    } else if (number < 0.001) {
+      decimals = 8;
+    } else if (number < 1) {
+      decimals = 6;
+    } else if (number < 100) {
+      decimals = 4;
+    } else {
+      decimals = 2;
+    }
+  }
+
+  return number.toLocaleString('en-US', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+}
+
+/**
  * Determines market trend based on buy/sell transactions
  * @param {number} buys - Number of buy transactions
  * @param {number} sells - Number of sell transactions
@@ -117,6 +149,7 @@ function parseFormattedNumber(formattedNum) {
 
 module.exports = {
   formatNumber,
+  formatRawNumber,
   getMarketTrend,
   calculatePriceDifference,
   formatPriceDifference,

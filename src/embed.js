@@ -1,6 +1,6 @@
 // Embed creation utilities
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
-const { formatNumber, getMarketTrend, calculatePriceDifference, formatPriceDifference, formatMultiplier } = require("./utils");
+const { formatNumber, formatRawNumber, getMarketTrend, calculatePriceDifference, formatPriceDifference, formatMultiplier } = require("./utils");
 
 /**
  * Creates a formatted Discord embed for token information
@@ -97,19 +97,19 @@ function createPriceComparisonEmbed(originalData, currentData, historicalData = 
     .setDescription(`Comparing prices from **${originalTime}** to **${currentTime}** (${chainName})`)
     .addFields(
       // Price comparison
-      { name: "💰 Original Price", value: `\`\`\`   $${formatNumber(originalPrice)}   \`\`\``, inline: true },
-      { name: "💰 Current Price", value: `\`\`\`   $${formatNumber(currentPrice)}   \`\`\``, inline: true },
-      { name: "📈 Price Change", value: `\`\`\`   ${formatPriceDifference(priceDiff)}   \`\`\``, inline: true },
+      { name: "💰 Original Price", value: `\`\`\`$${formatRawNumber(originalPrice)}\`\`\``, inline: true },
+      { name: "💰 Current Price", value: `\`\`\`$${formatRawNumber(currentPrice)}\`\`\``, inline: true },
+      { name: "📈 Price Change", value: `\`\`\`${formatPriceDifference(priceDiff)}\`\`\``, inline: true },
 
       // Market cap comparison
-      { name: "🐋 Original Market Cap", value: `\`\`\`   $${formatNumber(originalMarketCap)}   \`\`\``, inline: true },
-      { name: "🐋 Current Market Cap", value: `\`\`\`   $${formatNumber(currentMarketCap)}   \`\`\``, inline: true },
-      { name: "📊 MC Change", value: `\`\`\`   ${formatPriceDifference(marketCapDiff)}   \`\`\``, inline: true },
+      { name: "🐋 Original Market Cap", value: `\`\`\`$${formatRawNumber(originalMarketCap, 0)}\`\`\``, inline: true },
+      { name: "🐋 Current Market Cap", value: `\`\`\`$${formatRawNumber(currentMarketCap, 0)}\`\`\``, inline: true },
+      { name: "📊 MC Change", value: `\`\`\`${formatPriceDifference(marketCapDiff)}\`\`\``, inline: true },
 
       // Multipliers and volume
-      { name: "🚀 Price Multiplier", value: `\`\`\`   ${formatMultiplier(priceDiff.multiplier)}   \`\`\``, inline: true },
-      { name: "📊 MC Multiplier", value: `\`\`\`   ${formatMultiplier(marketCapDiff.multiplier)}   \`\`\``, inline: true },
-      { name: "🕒 Current Volume", value: `\`\`\`   $${formatNumber(currentVolume?.h24)}   \`\`\``, inline: true },
+      { name: "🚀 Price Multiplier", value: `\`\`\`${formatMultiplier(priceDiff.multiplier)}\`\`\``, inline: true },
+      { name: "📊 MC Multiplier", value: `\`\`\`${formatMultiplier(marketCapDiff.multiplier)}\`\`\``, inline: true },
+      { name: "🕒 Current Volume", value: `\`\`\`$${formatNumber(currentVolume?.h24)}\`\`\``, inline: true },
 
       // Contract address
       { name: "🏷️ Contract Address", value: `\`\`\`${address}\`\`\`` }
