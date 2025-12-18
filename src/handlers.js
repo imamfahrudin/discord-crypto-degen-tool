@@ -71,7 +71,9 @@ async function handleTokenQuery(message) {
         }
       }
     } catch (chartError) {
-      console.log("Chart generation failed, continuing without chart:", chartError.message);
+      console.log("📊 Chart generation failed, continuing without chart");
+      console.log(`📊 Chart error details: ${chartError.message}`);
+      console.log(`📊 Token: ${tokenData.baseToken.symbol} (${contractAddress}) on ${network}`);
     }
 
     const embed = createTokenEmbed(tokenData);

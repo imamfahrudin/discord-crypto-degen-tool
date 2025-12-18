@@ -82,8 +82,11 @@ async function fetchPoolInfo(network, poolAddress) {
  * @returns {Promise<Array>} Array of pools
  */
 async function searchPoolsByToken(network, tokenAddress) {
+  const url = `https://api.geckoterminal.com/api/v2/networks/${network}/tokens/${tokenAddress}/pools`;
+
   try {
-    const url = `https://api.geckoterminal.com/api/v2/networks/${network}/tokens/${tokenAddress}/pools`;
+    console.log(`🔍 Searching for pools: ${tokenAddress} on ${network}`);
+    console.log(`📡 API URL: ${url}`);
 
     const response = await fetch(url, {
       headers: {
@@ -92,14 +95,32 @@ async function searchPoolsByToken(network, tokenAddress) {
     });
 
     if (!response.ok) {
+      const errorText = await response.text().catch(() => 'No error details');
+      console.error(`❌ GeckoTerminal API error: ${response.status} ${response.statusText}`);
+      console.error(`❌ Error details: ${errorText}`);
+      console.error(`❌ Request URL: ${url}`);
+      console.error(`❌ Network: ${network}, Token: ${tokenAddress}`);
+
+      if (response.status === 404) {
+        console.error(`❌ Token ${tokenAddress} not found on ${network} network`);
+      }
+
       throw new Error(`GeckoTerminal API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    return data.data || [];
+    const pools = data.data || [];
+
+    console.log(`✅ Found ${pools.length} pools for ${tokenAddress} on ${network}`);
+    if (pools.length > 0) {
+      console.log(`📊 Top pool: ${pools[0].id} (${pools[0].attributes?.name || 'Unknown'})`);
+    }
+
+    return pools;
 
   } catch (error) {
-    console.error("Error searching pools:", error);
+    console.error(`💥 Error searching pools for ${tokenAddress} on ${network}:`, error.message);
+    console.error(`💥 Request URL: ${url}`);
     throw error;
   }
 }

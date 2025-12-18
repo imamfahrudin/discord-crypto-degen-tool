@@ -22,7 +22,8 @@ async function fetchTokenData(query) {
 
     return data.pairs[0];
   } catch (error) {
-    console.error("Error fetching token data:", error);
+    console.log(`🔍 DexScreener API error for query "${query}":`, error.message);
+    console.log(`🔍 API URL attempted: https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(query)}`);
     throw error;
   }
 }
@@ -85,7 +86,9 @@ async function fetchHistoricalPrice(contractAddress, chainId, timestamp) {
     };
 
   } catch (error) {
-    console.error("Error fetching historical price:", error);
+    console.log(`💰 CoinGecko historical API error for ${contractAddress}:`, error.message);
+    console.log(`💰 Network: ${chainId}, Platform: ${platform}, Date: ${dateString}`);
+    console.log(`💰 API URL attempted: ${url}`);
     return null;
   }
 }
@@ -142,7 +145,9 @@ async function fetchCurrentPriceFromCoinGecko(contractAddress, chainId) {
     };
 
   } catch (error) {
-    console.error("Error fetching current price from CoinGecko:", error);
+    console.log(`💰 CoinGecko API error for ${contractAddress}:`, error.message);
+    console.log(`💰 Network: ${chainId}, Platform: ${platform}`);
+    console.log(`💰 API URL attempted: ${url}`);
     return null;
   }
 }
