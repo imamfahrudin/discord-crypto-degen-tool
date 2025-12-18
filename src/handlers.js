@@ -71,15 +71,15 @@ async function handleTokenQuery(message) {
           };
         } else {
           chartStatusMessage = "📊 *Chart not available - insufficient trading data*";
-          console.log(`📊 No OHLC data available for ${tokenData.baseToken.symbol} on ${network}`);
+          console.log(`📊 No OHLC data available for ${tokenData.baseToken.symbol} on ${network} - setting status: ${chartStatusMessage}`);
         }
       } else {
         chartStatusMessage = "📊 *Chart not available - no liquidity pools found*";
-        console.log(`📊 No pools found for ${tokenData.baseToken.symbol} on ${network} (likely new/low-liquidity token)`);
+        console.log(`📊 No pools found for ${tokenData.baseToken.symbol} on ${network} (likely new/low-liquidity token) - setting status: ${chartStatusMessage}`);
       }
     } catch (chartError) {
       chartStatusMessage = "📊 *Chart not available - data source error*";
-      console.log("📊 Chart generation failed, continuing without chart");
+      console.log(`📊 Chart generation failed, continuing without chart - setting status: ${chartStatusMessage}`);
       console.log(`📊 Chart error details: ${chartError.message}`);
       console.log(`📊 Token: ${tokenData.baseToken.symbol} (${contractAddress}) on ${tokenData.chainId}`);
     }
@@ -89,11 +89,9 @@ async function handleTokenQuery(message) {
 
     // Add chart status message to embed description if no chart available
     if (chartStatusMessage && !chartAttachment) {
-      if (embed.data.description) {
-        embed.setDescription(embed.data.description + '\n\n' + chartStatusMessage);
-      } else {
-        embed.setDescription(chartStatusMessage);
-      }
+      console.log(`📊 Adding chart status message to embed: ${chartStatusMessage}`);
+      const currentDesc = embed.data.description || '';
+      embed.setDescription(currentDesc + (currentDesc ? '\n\n' : '') + chartStatusMessage);
     }
 
     const replyOptions = { embeds: [embed], components: [actionRow] };
