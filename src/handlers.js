@@ -87,11 +87,10 @@ async function handleTokenQuery(message) {
     const embed = createTokenEmbed(tokenData);
     const actionRow = createTokenActionRow(tokenData.url, tokenData.baseToken.address, tokenData.chainId, Math.floor(Date.now() / 1000));
 
-    // Add chart status message to embed description if no chart available
+    // Add chart status message as a field below contract address if no chart available
     if (chartStatusMessage && !chartAttachment) {
       console.log(`📊 Adding chart status message to embed: ${chartStatusMessage}`);
-      const currentDesc = embed.data.description || '';
-      embed.setDescription(currentDesc + (currentDesc ? '\n\n' : '') + chartStatusMessage);
+      embed.addFields({ name: "📊 Chart Status", value: chartStatusMessage, inline: false });
     }
 
     const replyOptions = { embeds: [embed], components: [actionRow] };
