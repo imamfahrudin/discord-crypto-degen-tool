@@ -51,7 +51,7 @@ async function handleTokenQuery(message) {
       const pools = await searchPoolsByToken(network, contractAddress);
       if (pools && pools.length > 0) {
         const poolAddress = pools[0].id.split('_')[1]; // Extract pool address
-        const ohlcData = await fetchOHLCData(network, poolAddress, 'hour', 24); // 24 hours of 1h data
+        const ohlcData = await fetchOHLCData(network, poolAddress, 'hour', parseInt(process.env.CHART_TIMEFRAME_HOURS) || 168); // Configurable hours of 1h data
 
         if (ohlcData && ohlcData.length > 0) {
           const chartBuffer = await generateCandlestickChart(
