@@ -1,8 +1,9 @@
 // Chart generation utilities using Chart.js and Canvas
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const { CandlestickController, CandlestickElement } = require('chartjs-chart-financial');
 
 // Import and register Chart.js date adapter
-require('chartjs-adapter-moment');
+require('chartjs-adapter-date-fns');
 
 /**
  * Generates a candlestick chart from OHLC data
@@ -23,33 +24,48 @@ async function generateCandlestickChart(ohlcData, tokenName, symbol, timeframe) 
       chartCallback: (ChartJS) => {
         ChartJS.defaults.responsive = false;
         ChartJS.defaults.maintainAspectRatio = false;
+        // Register candlestick components
+        ChartJS.register(CandlestickController, CandlestickElement);
         // Configure fonts for Docker environment
         ChartJS.defaults.font.family = 'Liberation Sans, DejaVu Sans, Arial, sans-serif';
         ChartJS.defaults.font.size = 12;
       }
     });
 
-    // Prepare data for Chart.js
-    const labels = ohlcData.map(item => new Date(item.timestamp * 1000));
-    const openData = ohlcData.map(item => item.open);
-    const highData = ohlcData.map(item => item.high);
-    const lowData = ohlcData.map(item => item.low);
-    const closeData = ohlcData.map(item => item.close);
+    // Prepare data for Chart.js candlestick format
+    const candlestickData = ohlcData.map(item => ({
+      x: item.timestamp * 1000,  // Timestamp in milliseconds
+      o: item.open,  // Open
+      h: item.high,  // High
+      l: item.low,   // Low
+      c: item.close  // Close
+    }));
+    const volumeData = ohlcData.map(item => item.volume);
 
     const configuration = {
-      type: 'line',
+      type: 'candlestick',
       data: {
-        labels: labels,
         datasets: [
           {
-            label: 'Close Price',
-            data: closeData,
-            borderColor: '#00D4AA',
-            backgroundColor: 'rgba(0, 212, 170, 0.1)',
-            borderWidth: 2,
-            fill: false,
-            pointRadius: 0,
-            pointHoverRadius: 0,
+            label: 'Price',
+            data: candlestickData,
+            color: {
+              up: '#00D4AA',    // Teal for up candles (matches Python)
+              down: '#FF6B6B',  // Coral for down candles
+              unchanged: '#e0e0e0'  // Light gray for unchanged
+            },
+            borderColor: {
+              up: '#00D4AA',
+              down: '#FF6B6B',
+              unchanged: '#e0e0e0'
+            }
+          },
+          {
+            label: 'Volume',
+            data: volumeData,
+            type: 'bar',  // Volume as bars below (like Python volume panel)
+            backgroundColor: '#00D4AA',  // Teal bars
+            yAxisID: 'volume'
           }
         ]
       },
@@ -57,7 +73,7 @@ async function generateCandlestickChart(ohlcData, tokenName, symbol, timeframe) 
         plugins: {
           title: {
             display: true,
-            text: `${tokenName} (${symbol}) - ${timeframe} Chart`,
+            text: `${tokenName} (${symbol}) - ${timeframe} Candlestick Chart`,
             font: {
               size: 16,
               weight: 'bold'
@@ -82,6 +98,7 @@ async function generateCandlestickChart(ohlcData, tokenName, symbol, timeframe) 
             }
           },
           y: {
+            position: 'right',  // Like Python y_on_right
             grid: {
               color: '#e0e0e0'
             },
@@ -90,12 +107,18 @@ async function generateCandlestickChart(ohlcData, tokenName, symbol, timeframe) 
                 return '$' + value.toFixed(6);
               }
             }
+          },
+          volume: {
+            type: 'linear',
+            position: 'left',
+            display: true,  // Show volume scale
+            grid: {
+              drawOnChartArea: false  // Separate volume area
+            }
           }
         },
-        elements: {
-          point: {
-            radius: 0
-          }
+        layout: {
+          padding: 20
         }
       }
     };
@@ -104,7 +127,7 @@ async function generateCandlestickChart(ohlcData, tokenName, symbol, timeframe) 
     return await chartJSNodeCanvas.renderToBuffer(configuration);
 
   } catch (error) {
-    console.error('Error generating chart:', error);
+    console.error('Error generating candlestick chart:', error);
     throw error;
   }
 }
