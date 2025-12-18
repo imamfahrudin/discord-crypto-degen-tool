@@ -1,11 +1,9 @@
-// Chart generation utilities using Chart.js and Canvas
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
-
-// Import date adapter (CommonJS compatible)
-require('chartjs-adapter-moment');
+// Chart generation utilities using Python backend
+const { spawn } = require('child_process');
+const path = require('path');
 
 /**
- * Generates a candlestick chart from OHLC data
+ * Generates a candlestick chart using Python backend
  * @param {Array} ohlcData - Array of OHLC objects with timestamp, open, high, low, close, volume
  * @param {string} tokenName - Token name for chart title
  * @param {string} symbol - Token symbol
@@ -13,125 +11,71 @@ require('chartjs-adapter-moment');
  * @returns {Promise<Buffer>} PNG image buffer
  */
 async function generateCandlestickChart(ohlcData, tokenName, symbol, timeframe) {
-  try {
-    // Dynamically import ES module components
-    const { CandlestickController, CandlestickElement } = await import('chartjs-chart-financial');
+  return new Promise((resolve, reject) => {
+    try {
+      // Prepare data for Python script
+      const inputData = {
+        ohlcData,
+        tokenName,
+        symbol,
+        timeframe
+      };
 
-    // Create chart canvas with font configuration
-    const width = 800;
-    const height = 400;
-    const chartJSNodeCanvas = new ChartJSNodeCanvas({
-      width,
-      height,
-      chartCallback: (ChartJS) => {
-        ChartJS.defaults.responsive = false;
-        ChartJS.defaults.maintainAspectRatio = false;
-        // Register candlestick components
-        ChartJS.register(CandlestickController, CandlestickElement);
-        // Configure fonts for Docker environment
-        ChartJS.defaults.font.family = 'Liberation Sans, DejaVu Sans, Arial, sans-serif';
-        ChartJS.defaults.font.size = 12;
-      }
-    });
+      // Spawn Python process
+      const pythonProcess = spawn('python3', [path.join(__dirname, '..', 'chart_generator.py')], {
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
 
-    // Prepare data for Chart.js candlestick format
-    const candlestickData = ohlcData.map(item => ({
-      x: item.timestamp * 1000,  // Timestamp in milliseconds
-      o: item.open,  // Open
-      h: item.high,  // High
-      l: item.low,   // Low
-      c: item.close  // Close
-    }));
-    const volumeData = ohlcData.map(item => item.volume);
+      let stdout = '';
+      let stderr = '';
 
-    const configuration = {
-      type: 'candlestick',
-      data: {
-        datasets: [
-          {
-            label: 'Price',
-            data: candlestickData,
-            color: {
-              up: '#00D4AA',    // Teal for up candles (matches Python)
-              down: '#FF6B6B',  // Coral for down candles
-              unchanged: '#e0e0e0'  // Light gray for unchanged
-            },
-            borderColor: {
-              up: '#00D4AA',
-              down: '#FF6B6B',
-              unchanged: '#e0e0e0'
-            }
-          },
-          {
-            label: 'Volume',
-            data: volumeData,
-            type: 'bar',  // Volume as bars below (like Python volume panel)
-            backgroundColor: '#00D4AA',  // Teal bars
-            yAxisID: 'volume'
-          }
-        ]
-      },
-      options: {
-        plugins: {
-          title: {
-            display: true,
-            text: `${tokenName} (${symbol}) - ${timeframe} Candlestick Chart`,
-            font: {
-              size: 16,
-              weight: 'bold'
-            },
-            padding: 20
-          },
-          legend: {
-            display: false
-          }
-        },
-        scales: {
-          x: {
-            type: 'time',
-            time: {
-              displayFormats: {
-                hour: 'HH:mm',
-                day: 'MMM dd'
-              }
-            },
-            grid: {
-              color: '#e0e0e0'
-            }
-          },
-          y: {
-            position: 'right',  // Like Python y_on_right
-            grid: {
-              color: '#e0e0e0'
-            },
-            ticks: {
-              callback: function(value) {
-                return '$' + value.toFixed(6);
-              }
-            }
-          },
-          volume: {
-            type: 'linear',
-            position: 'left',
-            display: true,  // Show volume scale
-            grid: {
-              drawOnChartArea: false  // Separate volume area
-            }
-          }
-        },
-        layout: {
-          padding: 20
+      // Send data to Python script via stdin
+      pythonProcess.stdin.write(JSON.stringify(inputData));
+      pythonProcess.stdin.end();
+
+      // Collect output
+      pythonProcess.stdout.on('data', (data) => {
+        stdout += data.toString();
+      });
+
+      pythonProcess.stderr.on('data', (data) => {
+        stderr += data.toString();
+      });
+
+      // Handle process completion
+      pythonProcess.on('close', (code) => {
+        if (code !== 0) {
+          console.error('Python chart generator failed:', stderr);
+          reject(new Error(`Python process exited with code ${code}: ${stderr}`));
+          return;
         }
-      }
-    };
 
-    // Return PNG buffer
-    return await chartJSNodeCanvas.renderToBuffer(configuration);
+        try {
+          const result = JSON.parse(stdout.trim());
 
-  } catch (error) {
-    console.error('Error generating candlestick chart:', error);
-    throw error;
-  }
+          if (result.success && result.image) {
+            // Convert base64 back to buffer
+            const imageBuffer = Buffer.from(result.image, 'base64');
+            resolve(imageBuffer);
+          } else {
+            reject(new Error(result.error || 'Chart generation failed'));
+          }
+        } catch (parseError) {
+          console.error('Failed to parse Python output:', stdout);
+          reject(new Error(`Failed to parse Python output: ${parseError.message}`));
+        }
+      });
+
+      pythonProcess.on('error', (error) => {
+        console.error('Failed to start Python process:', error);
+        reject(new Error(`Failed to start Python process: ${error.message}`));
+      });
+
+    } catch (error) {
+      console.error('Error in generateCandlestickChart:', error);
+      reject(error);
+    }
+  });
 }
 
 /**
