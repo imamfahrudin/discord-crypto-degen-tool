@@ -158,7 +158,7 @@ function createTokenActionRow(url, contractAddress, chainId, timestamp) {
       .setStyle(ButtonStyle.Link)
       .setURL(url),
     new ButtonBuilder()
-      .setLabel("📊 Price Comparison")
+      .setLabel("💰 Check Current Price")
       .setStyle(ButtonStyle.Secondary)
       .setCustomId(`price_comparison_${contractAddress}_${chainId}_${timestamp}`)
   );
