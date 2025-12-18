@@ -153,7 +153,7 @@ async function handleTokenQuery(message) {
       new ButtonBuilder()
         .setLabel("🔍 View on DexScreener")
         .setStyle(ButtonStyle.Link)
-        .setURL(url)
+        .setURL(tokenData.url)
     );
 
     await message.reply({ embeds: [embed], components: [actionRow] });
