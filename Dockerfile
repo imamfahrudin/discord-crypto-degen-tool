@@ -3,7 +3,7 @@ FROM debian:bookworm-slim
 
 # Install Node.js 18.x, Python 3, and fonts for chart rendering
 RUN apt-get update && \
-    apt-get install -y curl ca-certificates gnupg fonts-liberation fonts-dejavu python3 python3-pip python3-dev && \
+    apt-get install -y curl ca-certificates gnupg fonts-liberation fonts-dejavu python3 python3-pip python3-dev python3-venv && \
     curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
