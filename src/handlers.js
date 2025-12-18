@@ -2,7 +2,7 @@
 const { createTokenEmbed, createDexScreenerButton } = require("./embed");
 const { fetchTokenData } = require("./api");
 const { fetchOHLCData, searchPoolsByToken } = require("./geckoterminal");
-const { generatePriceChart } = require("./chart");
+const { generateCandlestickChart } = require("./chart");
 
 // Regex patterns
 const PATTERNS = {
@@ -54,7 +54,7 @@ async function handleTokenQuery(message) {
         const ohlcData = await fetchOHLCData(network, poolAddress, 'hour', 24); // 24 hours of 1h data
 
         if (ohlcData && ohlcData.length > 0) {
-          const chartBuffer = await generatePriceChart(
+          const chartBuffer = await generateCandlestickChart(
             ohlcData,
             tokenData.baseToken.name,
             tokenData.baseToken.symbol,
