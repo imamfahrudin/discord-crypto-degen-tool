@@ -13,23 +13,23 @@ require("dotenv").config();
 // Configuration constants
 const CONFIG = {
   COLORS: {
-    PRIMARY: "#00b0f4",
+    PRIMARY: process.env.PRIMARY_COLOR || "#00b0f4",
   },
-  DEXSCREENER_API: "https://api.dexscreener.com/latest/dex/search",
+  DEXSCREENER_API: process.env.DEXSCREENER_API || "https://api.dexscreener.com/latest/dex/search",
   MESSAGES: {
-    BOT_READY: "✅ Bot is online as",
-    TOKEN_NOT_FOUND: "🚫 Token not found.",
-    FETCH_ERROR: "❌ Failed to fetch token data. Please try again later.",
-    COPY_CONTRACT: "📋 Contract Address:",
+    BOT_READY: process.env.BOT_READY_MESSAGE || "✅ Bot is online as",
+    TOKEN_NOT_FOUND: process.env.TOKEN_NOT_FOUND_MESSAGE || "🚫 Token not found.",
+    FETCH_ERROR: process.env.FETCH_ERROR_MESSAGE || "❌ Failed to fetch token data. Please try again later.",
+    COPY_CONTRACT: process.env.COPY_CONTRACT_MESSAGE || "📋 Contract Address:",
   },
   BUTTONS: {
     COPY_CONTRACT: {
-      ID: "copy_ca",
-      LABEL: "📋 Copy Contract",
+      ID: process.env.COPY_CONTRACT_BUTTON_ID || "copy_ca",
+      LABEL: process.env.COPY_CONTRACT_BUTTON_LABEL || "📋 Copy Contract",
     },
   },
   FOOTER: {
-    TEXT: "DO YOUR OWN RESEARCH-ALWAYS!",
+    TEXT: process.env.FOOTER_TEXT || "DO YOUR OWN RESEARCH-ALWAYS!",
   },
 };
 
