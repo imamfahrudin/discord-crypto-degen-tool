@@ -1,9 +1,9 @@
 # Using Debian slim (stable and reliable)
 FROM debian:bookworm-slim
 
-# Install Node.js 18.x from NodeSource
+# Install Node.js 18.x and fonts for chart rendering
 RUN apt-get update && \
-    apt-get install -y curl ca-certificates gnupg && \
+    apt-get install -y curl ca-certificates gnupg fonts-liberation fonts-dejavu && \
     curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*

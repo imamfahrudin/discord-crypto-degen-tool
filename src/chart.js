@@ -14,7 +14,7 @@ require('chartjs-adapter-moment');
  */
 async function generateCandlestickChart(ohlcData, tokenName, symbol, timeframe) {
   try {
-    // Create chart canvas
+    // Create chart canvas with font configuration
     const width = 800;
     const height = 400;
     const chartJSNodeCanvas = new ChartJSNodeCanvas({
@@ -23,6 +23,9 @@ async function generateCandlestickChart(ohlcData, tokenName, symbol, timeframe) 
       chartCallback: (ChartJS) => {
         ChartJS.defaults.responsive = false;
         ChartJS.defaults.maintainAspectRatio = false;
+        // Configure fonts for Docker environment
+        ChartJS.defaults.font.family = 'Liberation Sans, DejaVu Sans, Arial, sans-serif';
+        ChartJS.defaults.font.size = 12;
       }
     });
 
@@ -124,6 +127,9 @@ async function generatePriceChart(ohlcData, tokenName, symbol, timeframe) {
       chartCallback: (ChartJS) => {
         ChartJS.defaults.responsive = false;
         ChartJS.defaults.maintainAspectRatio = false;
+        // Configure fonts for Docker environment
+        ChartJS.defaults.font.family = 'Liberation Sans, DejaVu Sans, Arial, sans-serif';
+        ChartJS.defaults.font.size = 12;
       }
     });
 
