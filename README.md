@@ -10,8 +10,9 @@ A Discord bot that automatically detects cryptocurrency contract addresses in me
 
 - 🔍 Automatic token detection from contract addresses (e.g., 0x1234567890abcdef...)
 - 📊 Rich embeds with market data, liquidity, volume, and price changes
+- 📈 **NEW:** Automatic price charts integrated directly in embeds
 - 📋 Copy contract address button
-- 💹 Real-time data from DexScreener
+- 💹 Real-time data from DexScreener + GeckoTerminal
 - 🌐 Multi-chain support
 
 ## 📋 Prerequisites
@@ -61,7 +62,22 @@ A Discord bot that automatically detects cryptocurrency contract addresses in me
 The bot will automatically respond to messages containing:
 - Contract addresses (e.g., `0x1234567890abcdef...`)
 
-It displays formatted embeds with token information and a button to copy the contract address.
+It displays formatted embeds with:
+- Token information from DexScreener
+- **Automatic price charts** from GeckoTerminal (when available)
+- A button to view the token on DexScreener
+
+### 📈 Chart Feature
+
+Price charts are **automatically generated and included** in the embed when a token is detected, showing:
+- 24 hours of 1-hour candlestick data from GeckoTerminal
+- Interactive price visualization integrated directly in the embed
+- Real-time OHLC data from DEX pools
+
+**Supported Networks:**
+- Ethereum, BSC, Polygon, Arbitrum, Optimism, Base, Avalanche, Solana, and more
+
+*Note: Charts are generated in the background and may take a few seconds to appear. If chart generation fails, the embed will still show all other token information.*
 
 ## 🐳 Docker Commands
 

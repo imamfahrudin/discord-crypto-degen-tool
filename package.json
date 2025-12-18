@@ -13,7 +13,8 @@
   "dependencies": {
     "discord.js": "^14.14.1",
     "node-fetch": "^2.7.0",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "chartjs-node-canvas": "^4.1.6"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
