@@ -10,7 +10,7 @@ const path = require('path');
  * @param {string} timeframe - Chart timeframe (e.g., '1h', '4h', '1d')
  * @returns {Promise<Buffer>} PNG image buffer
  */
-async function generateCandlestickChart(ohlcData, tokenName, symbol, timeframe) {
+async function generateCandlestickChart(ohlcData, tokenName, symbol, timeframe, contractAddress = null, network = null) {
   return new Promise((resolve, reject) => {
     try {
       // Prepare data for Python script
@@ -18,7 +18,9 @@ async function generateCandlestickChart(ohlcData, tokenName, symbol, timeframe) 
         ohlcData,
         tokenName,
         symbol,
-        timeframe
+        timeframe,
+        contractAddress,
+        network
       };
 
       // Spawn Python process

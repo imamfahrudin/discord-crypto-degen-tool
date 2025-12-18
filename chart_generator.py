@@ -17,7 +17,7 @@ import mplfinance as mpf
 from datetime import datetime
 import warnings
 
-def generate_candlestick_chart(ohlc_data, token_name, symbol, timeframe):
+def generate_candlestick_chart(ohlc_data, token_name, symbol, timeframe, contract_address=None, network=None):
     """
     Generate a candlestick chart using the same logic as the Python screening tool.
 
@@ -99,7 +99,17 @@ def generate_candlestick_chart(ohlc_data, token_name, symbol, timeframe):
 
         # Title and formatting
         timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
-        ax.set_title(f'{token_name} ({symbol}) - {timeframe.upper()} Candlestick Chart • {timestamp}',
+        title_lines = [f'{symbol} • {timeframe.upper()} • {timestamp}']
+        
+        # Add second line with contract address and network if available
+        if contract_address and network:
+            title_lines.append(f'{contract_address} • {network.upper()}')
+        elif contract_address:
+            title_lines.append(f'{contract_address}')
+        elif network:
+            title_lines.append(f'{network.upper()}')
+        
+        ax.set_title('\n'.join(title_lines),
                     color='#212121', fontsize=16, pad=20, fontweight='bold')
 
         # Grid styling
@@ -136,9 +146,11 @@ if __name__ == "__main__":
         token_name = input_data['tokenName']
         symbol = input_data['symbol']
         timeframe = input_data['timeframe']
+        contract_address = input_data.get('contractAddress')
+        network = input_data.get('network')
 
         # Generate chart
-        result = generate_candlestick_chart(ohlc_data, token_name, symbol, timeframe)
+        result = generate_candlestick_chart(ohlc_data, token_name, symbol, timeframe, contract_address, network)
 
         if result:
             # Output base64 image

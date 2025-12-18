@@ -58,7 +58,9 @@ async function handleTokenQuery(message) {
             ohlcData,
             tokenData.baseToken.name,
             tokenData.baseToken.symbol,
-            '1h'
+            '1h',
+            contractAddress,
+            network
           );
 
           chartAttachment = {
