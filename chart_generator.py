@@ -35,6 +35,9 @@ def generate_candlestick_chart(ohlc_data, token_name, symbol, timeframe, contrac
         df = pd.DataFrame(ohlc_data)
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='s')
         df = df.set_index('timestamp')
+        
+        # Sort by timestamp to ensure chronological order (oldest first)
+        df = df.sort_index()
         df = df.rename(columns={
             'open': 'Open',
             'high': 'High',
