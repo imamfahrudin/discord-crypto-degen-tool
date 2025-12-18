@@ -114,7 +114,7 @@ function createPriceComparisonEmbed(originalData, currentData, historicalData = 
       // Contract address
       { name: "🏷️ Contract Address", value: `\`\`\`${address}\`\`\`` }
     )
-    .setFooter({ text: "Price comparison data from DexScreener | DO YOUR OWN RESEARCH!" })
+    .setFooter({ text: process.env.FOOTER_TEXT || "DO YOUR OWN RESEARCH-ALWAYS!" })
     .setTimestamp();
 
   // Add historical data note if available
