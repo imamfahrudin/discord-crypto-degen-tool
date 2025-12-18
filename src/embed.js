@@ -1,6 +1,6 @@
 // Embed creation utilities
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
-const { formatNumber, getMarketTrend } = require("./utils");
+const { formatNumber, getMarketTrend, calculatePriceDifference, formatPriceDifference, formatMultiplier } = require("./utils");
 
 /**
  * Creates a formatted Discord embed for token information
@@ -59,6 +59,77 @@ function createTokenEmbed(token) {
 }
 
 /**
+ * Creates a price comparison embed showing differences since original timestamp
+ * @param {Object} originalData - Original token data with timestamp
+ * @param {Object} currentData - Current token data
+ * @param {Object} historicalData - Historical data from CoinGecko (optional)
+ * @returns {EmbedBuilder} Price comparison embed
+ */
+function createPriceComparisonEmbed(originalData, currentData, historicalData = null) {
+  const {
+    baseToken: { name, symbol, address },
+    chainId,
+    priceUsd: originalPrice,
+    marketCap: originalMarketCap,
+    volume,
+    timestamp: originalTimestamp
+  } = originalData;
+
+  const {
+    priceUsd: currentPrice,
+    marketCap: currentMarketCap,
+    volume: currentVolume
+  } = currentData;
+
+  const chainName = chainId.toUpperCase();
+
+  // Calculate price differences
+  const priceDiff = calculatePriceDifference(originalPrice, currentPrice);
+  const marketCapDiff = calculatePriceDifference(originalMarketCap, currentMarketCap);
+
+  // Format timestamps
+  const originalTime = new Date(originalTimestamp * 1000).toLocaleString();
+  const currentTime = new Date().toLocaleString();
+
+  const embed = new EmbedBuilder()
+    .setColor(priceDiff.direction === "up" ? 0x00ff00 : priceDiff.direction === "down" ? 0xff0000 : 0x808080)
+    .setTitle(`📊 ${name} (${symbol}) - Price Comparison`)
+    .setDescription(`Comparing prices from **${originalTime}** to **${currentTime}** (${chainName})`)
+    .addFields(
+      // Price comparison
+      { name: "💰 Original Price", value: `\`\`\`   $${formatNumber(originalPrice)}   \`\`\``, inline: true },
+      { name: "💰 Current Price", value: `\`\`\`   $${formatNumber(currentPrice)}   \`\`\``, inline: true },
+      { name: "📈 Price Change", value: `\`\`\`   ${formatPriceDifference(priceDiff)}   \`\`\``, inline: true },
+
+      // Market cap comparison
+      { name: "🐋 Original Market Cap", value: `\`\`\`   $${formatNumber(originalMarketCap)}   \`\`\``, inline: true },
+      { name: "🐋 Current Market Cap", value: `\`\`\`   $${formatNumber(currentMarketCap)}   \`\`\``, inline: true },
+      { name: "📊 MC Change", value: `\`\`\`   ${formatPriceDifference(marketCapDiff)}   \`\`\``, inline: true },
+
+      // Multipliers and volume
+      { name: "🚀 Price Multiplier", value: `\`\`\`   ${formatMultiplier(priceDiff.multiplier)}   \`\`\``, inline: true },
+      { name: "📊 MC Multiplier", value: `\`\`\`   ${formatMultiplier(marketCapDiff.multiplier)}   \`\`\``, inline: true },
+      { name: "🕒 Current Volume", value: `\`\`\`   $${formatNumber(currentVolume?.h24)}   \`\`\``, inline: true },
+
+      // Contract address
+      { name: "🏷️ Contract Address", value: `\`\`\`${address}\`\`\`` }
+    )
+    .setFooter({ text: "Price comparison data from DexScreener | DO YOUR OWN RESEARCH!" })
+    .setTimestamp();
+
+  // Add historical data note if available
+  if (historicalData) {
+    embed.addFields({
+      name: "📅 Historical Data",
+      value: `*Data includes historical price information from CoinGecko*`,
+      inline: false
+    });
+  }
+
+  return embed;
+}
+
+/**
  * Creates action row with DexScreener link button
  * @param {string} url - DexScreener URL
  * @returns {ActionRowBuilder} Action row with button
@@ -72,7 +143,30 @@ function createDexScreenerButton(url) {
   );
 }
 
+/**
+ * Creates action row with both DexScreener and Price Comparison buttons
+ * @param {string} url - DexScreener URL
+ * @param {string} contractAddress - Token contract address
+ * @param {string} chainId - Blockchain network
+ * @param {number} timestamp - Original timestamp
+ * @returns {ActionRowBuilder} Action row with both buttons
+ */
+function createTokenActionRow(url, contractAddress, chainId, timestamp) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setLabel("🔍 View on DexScreener")
+      .setStyle(ButtonStyle.Link)
+      .setURL(url),
+    new ButtonBuilder()
+      .setLabel("📊 Price Comparison")
+      .setStyle(ButtonStyle.Secondary)
+      .setCustomId(`price_comparison_${contractAddress}_${chainId}_${timestamp}`)
+  );
+}
+
 module.exports = {
   createTokenEmbed,
+  createPriceComparisonEmbed,
   createDexScreenerButton,
+  createTokenActionRow,
 };

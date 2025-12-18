@@ -1,6 +1,6 @@
 // Event handlers for Discord bot
-const { createTokenEmbed, createDexScreenerButton } = require("./embed");
-const { fetchTokenData } = require("./api");
+const { createTokenEmbed, createPriceComparisonEmbed, createDexScreenerButton, createTokenActionRow } = require("./embed");
+const { fetchTokenData, fetchHistoricalPrice, fetchCurrentPriceFromCoinGecko } = require("./api");
 const { fetchOHLCData, searchPoolsByToken } = require("./geckoterminal");
 const { generateCandlestickChart } = require("./chart");
 
@@ -74,7 +74,7 @@ async function handleTokenQuery(message) {
     }
 
     const embed = createTokenEmbed(tokenData);
-    const actionRow = createDexScreenerButton(tokenData.url);
+    const actionRow = createTokenActionRow(tokenData.url, tokenData.baseToken.address, tokenData.chainId, Math.floor(Date.now() / 1000));
 
     const replyOptions = { embeds: [embed], components: [actionRow] };
 
@@ -100,7 +100,71 @@ async function handleTokenQuery(message) {
 async function handleButtonInteraction(interaction) {
   if (!interaction.isButton()) return;
 
-  // No interactive buttons currently - all are link buttons
+  const customId = interaction.customId;
+
+  if (customId.startsWith('price_comparison_')) {
+    await handlePriceComparison(interaction);
+    return;
+  }
+
+  // No other interactive buttons currently
+}
+
+/**
+ * Handles price comparison button interaction
+ * @param {Interaction} interaction - Discord button interaction
+ */
+async function handlePriceComparison(interaction) {
+  const parts = interaction.customId.split('_');
+  const contractAddress = parts[2];
+  const chainId = parts[3];
+  const originalTimestamp = parseInt(parts[4]);
+
+  await interaction.deferReply();
+
+  try {
+    // Get current data
+    const currentData = await fetchTokenData(contractAddress);
+    if (!currentData) {
+      await interaction.editReply("🚫 Unable to fetch current token data.");
+      return;
+    }
+
+    // Create original data object with timestamp
+    const originalData = {
+      ...currentData,
+      timestamp: originalTimestamp
+    };
+
+    // Try to get historical data from CoinGecko for more accurate comparison
+    let historicalData = null;
+    try {
+      historicalData = await fetchHistoricalPrice(contractAddress, chainId, originalTimestamp);
+    } catch (error) {
+      console.log("Historical data not available, using current data for comparison:", error.message);
+    }
+
+    // If we have historical data, use it for more accurate original prices
+    if (historicalData && historicalData.price) {
+      originalData.priceUsd = historicalData.price;
+      originalData.marketCap = historicalData.marketCap;
+    }
+
+    // Create comparison embed
+    const comparisonEmbed = createPriceComparisonEmbed(originalData, currentData, historicalData);
+
+    // Create action row with DexScreener link
+    const actionRow = createDexScreenerButton(currentData.url);
+
+    await interaction.editReply({
+      embeds: [comparisonEmbed],
+      components: [actionRow]
+    });
+
+  } catch (error) {
+    console.error("Error handling price comparison:", error);
+    await interaction.editReply("❌ Failed to generate price comparison. Please try again later.");
+  }
 }
 
 module.exports = {
