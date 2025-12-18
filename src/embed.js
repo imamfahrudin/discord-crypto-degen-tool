@@ -54,7 +54,8 @@ function createTokenEmbed(token) {
       // Contract address
       { name: "🏷️ Contract Address", value: `\`\`\`${address}\`\`\`` }
     )
-    .setFooter({ text: process.env.FOOTER_TEXT || "DO YOUR OWN RESEARCH-ALWAYS!" });
+    .setFooter({ text: process.env.FOOTER_TEXT || "DO YOUR OWN RESEARCH-ALWAYS!" })
+    .setTimestamp();
 }
 
 /**
