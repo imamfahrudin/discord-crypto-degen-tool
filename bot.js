@@ -77,7 +77,6 @@ function createTokenEmbed(token) {
   return new EmbedBuilder()
     .setColor(parseInt(process.env.PRIMARY_COLOR) || 0x00b0f4)
     .setTitle(`${name} (${symbol}) - ${chainName}`)
-    .setURL(url)
     .addFields(
       // Market metrics
       { name: "🐋 Market Cap", value: `\`\`\`   $${formatNumber(marketCap)}   \`\`\``, inline: true },
@@ -149,12 +148,12 @@ async function handleTokenQuery(message) {
 
     const embed = createTokenEmbed(tokenData);
 
-    // Create DexScreener button
+    // Create DexScreener link button
     const actionRow = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId("dexscreener_link")
-        .setLabel("� View on DexScreener")
-        .setStyle(ButtonStyle.Primary)
+        .setLabel("🔍 View on DexScreener")
+        .setStyle(ButtonStyle.Link)
+        .setURL(url)
     );
 
     await message.reply({ embeds: [embed], components: [actionRow] });
@@ -172,21 +171,7 @@ async function handleTokenQuery(message) {
 async function handleButtonInteraction(interaction) {
   if (!interaction.isButton()) return;
 
-  if (interaction.customId === "dexscreener_link") {
-    // Get the DexScreener URL from the embed
-    const embedUrl = interaction.message.embeds[0]?.url;
-    if (embedUrl) {
-      await interaction.reply({
-        content: `🔍 View on DexScreener: ${embedUrl}`,
-        ephemeral: true
-      });
-    } else {
-      await interaction.reply({
-        content: "❌ Unable to find DexScreener link.",
-        ephemeral: true
-      });
-    }
-  }
+  // No interactive buttons currently - all are link buttons
 }
 
 // Initialize Discord client
