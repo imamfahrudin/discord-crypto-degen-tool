@@ -164,9 +164,35 @@ function createTokenActionRow(url, contractAddress, chainId, timestamp) {
   );
 }
 
+/**
+ * Creates action row for price comparison embed with Refresh and Delete buttons
+ * @param {string} contractAddress - Token contract address
+ * @param {string} chainId - Blockchain network
+ * @param {number} originalTimestamp - Original timestamp from the first embed
+ * @param {string} url - DexScreener URL
+ * @returns {ActionRowBuilder} Action row with refresh and delete buttons
+ */
+function createPriceComparisonActionRow(contractAddress, chainId, originalTimestamp, url) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setLabel("🔄 Refresh Price")
+      .setStyle(ButtonStyle.Primary)
+      .setCustomId(`price_refresh_${contractAddress}_${chainId}_${originalTimestamp}`),
+    new ButtonBuilder()
+      .setLabel("🗑️ Delete")
+      .setStyle(ButtonStyle.Danger)
+      .setCustomId(`price_delete`),
+    new ButtonBuilder()
+      .setLabel("🔍 View on DexScreener")
+      .setStyle(ButtonStyle.Link)
+      .setURL(url)
+  );
+}
+
 module.exports = {
   createTokenEmbed,
   createPriceComparisonEmbed,
   createDexScreenerButton,
   createTokenActionRow,
+  createPriceComparisonActionRow,
 };

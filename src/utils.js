@@ -88,10 +88,38 @@ function formatMultiplier(multiplier) {
   }
 }
 
+/**
+ * Parses formatted numbers with K, M, B suffixes back to regular numbers
+ * @param {string} formattedNum - Formatted number string (e.g., "1.5M", "250K", "2B")
+ * @returns {number} Parsed number
+ */
+function parseFormattedNumber(formattedNum) {
+  if (!formattedNum || typeof formattedNum !== 'string') return 0;
+
+  const numStr = formattedNum.replace(/[$,]/g, '');
+  const lastChar = numStr.slice(-1).toUpperCase();
+  const num = parseFloat(numStr.slice(0, -1));
+
+  if (isNaN(num)) return 0;
+
+  switch (lastChar) {
+    case 'K':
+      return num * 1000;
+    case 'M':
+      return num * 1000000;
+    case 'B':
+      return num * 1000000000;
+    default:
+      // If no suffix, parse the whole string as a number
+      return parseFloat(numStr) || 0;
+  }
+}
+
 module.exports = {
   formatNumber,
   getMarketTrend,
   calculatePriceDifference,
   formatPriceDifference,
   formatMultiplier,
+  parseFormattedNumber,
 };

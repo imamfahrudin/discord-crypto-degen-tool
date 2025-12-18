@@ -1,8 +1,7 @@
 // Event handlers for Discord bot
-const { createTokenEmbed, createPriceComparisonEmbed, createDexScreenerButton, createTokenActionRow } = require("./embed");
+const { createTokenEmbed, createPriceComparisonEmbed, createDexScreenerButton, createTokenActionRow, createPriceComparisonActionRow } = require("./embed");
 const { fetchTokenData, fetchHistoricalPrice, fetchCurrentPriceFromCoinGecko } = require("./api");
-const { fetchOHLCData, searchPoolsByToken } = require("./geckoterminal");
-const { generateCandlestickChart } = require("./chart");
+const { formatNumber, getMarketTrend, calculatePriceDifference, formatPriceDifference, formatMultiplier, parseFormattedNumber } = require("./utils");
 
 // Regex patterns
 const PATTERNS = {
@@ -107,6 +106,16 @@ async function handleButtonInteraction(interaction) {
     return;
   }
 
+  if (customId.startsWith('price_refresh_')) {
+    await handlePriceRefresh(interaction);
+    return;
+  }
+
+  if (customId === 'price_delete') {
+    await handlePriceDelete(interaction);
+    return;
+  }
+
   // No other interactive buttons currently
 }
 
@@ -153,8 +162,8 @@ async function handlePriceComparison(interaction) {
     // Create comparison embed
     const comparisonEmbed = createPriceComparisonEmbed(originalData, currentData, historicalData);
 
-    // Create action row with DexScreener link
-    const actionRow = createDexScreenerButton(currentData.url);
+    // Create action row with refresh, delete, and DexScreener buttons
+    const actionRow = createPriceComparisonActionRow(contractAddress, chainId, originalTimestamp, currentData.url);
 
     await interaction.editReply({
       embeds: [comparisonEmbed],
@@ -164,6 +173,114 @@ async function handlePriceComparison(interaction) {
   } catch (error) {
     console.error("Error handling price comparison:", error);
     await interaction.editReply("❌ Failed to generate price comparison. Please try again later.");
+  }
+}
+
+/**
+ * Handles price refresh button interaction
+ * @param {Interaction} interaction - Discord button interaction
+ */
+async function handlePriceRefresh(interaction) {
+  const parts = interaction.customId.split('_');
+  const contractAddress = parts[2];
+  const chainId = parts[3];
+  const originalTimestamp = parseInt(parts[4]);
+
+  await interaction.deferUpdate();
+
+  try {
+    // Get fresh current data
+    const currentData = await fetchTokenData(contractAddress);
+    if (!currentData) {
+      await interaction.editReply({ content: "🚫 Unable to fetch current token data.", embeds: [], components: [] });
+      return;
+    }
+
+    // Get the original message that was replied to (the first embed)
+    const originalMessage = await interaction.message.fetchReference();
+    if (!originalMessage) {
+      await interaction.editReply({ content: "🚫 Unable to find original message for comparison.", embeds: [], components: [] });
+      return;
+    }
+
+    // Extract original data from the replied message embed
+    const originalEmbed = originalMessage.embeds[0];
+    if (!originalEmbed) {
+      await interaction.editReply({ content: "🚫 Unable to find original embed data.", embeds: [], components: [] });
+      return;
+    }
+
+    // Parse original price and market cap from the embed fields
+    let originalPrice = null;
+    let originalMarketCap = null;
+
+    originalEmbed.fields.forEach(field => {
+      if (field.name.includes("Price") && !field.name.includes("Change")) {
+        // Extract price from code block
+        const priceMatch = field.value.match(/```[\s]*\$([0-9,.KM]+)[\s]*```/);
+        if (priceMatch) {
+          originalPrice = parseFormattedNumber(priceMatch[1]);
+        }
+      }
+      if (field.name.includes("Market Cap") && !field.name.includes("Change")) {
+        // Extract market cap from code block
+        const mcMatch = field.value.match(/```[\s]*\$([0-9,.KM]+)[\s]*```/);
+        if (mcMatch) {
+          originalMarketCap = parseFormattedNumber(mcMatch[1]);
+        }
+      }
+    });
+
+    // Create original data object
+    const originalData = {
+      ...currentData,
+      priceUsd: originalPrice || currentData.priceUsd,
+      marketCap: originalMarketCap || currentData.marketCap,
+      timestamp: originalTimestamp
+    };
+
+    // Try to get historical data from CoinGecko for more accurate comparison
+    let historicalData = null;
+    try {
+      historicalData = await fetchHistoricalPrice(contractAddress, chainId, originalTimestamp);
+    } catch (error) {
+      console.log("Historical data not available for refresh:", error.message);
+    }
+
+    // If we have historical data, use it for more accurate original prices
+    if (historicalData && historicalData.price) {
+      originalData.priceUsd = historicalData.price;
+      originalData.marketCap = historicalData.marketCap;
+    }
+
+    // Create updated comparison embed
+    const comparisonEmbed = createPriceComparisonEmbed(originalData, currentData, historicalData);
+
+    // Create action row with refresh, delete, and DexScreener buttons
+    const actionRow = createPriceComparisonActionRow(contractAddress, chainId, originalTimestamp, currentData.url);
+
+    await interaction.editReply({
+      embeds: [comparisonEmbed],
+      components: [actionRow]
+    });
+
+  } catch (error) {
+    console.error("Error refreshing price comparison:", error);
+    await interaction.editReply({ content: "❌ Failed to refresh price comparison. Please try again later.", embeds: [], components: [] });
+  }
+}
+
+/**
+ * Handles price delete button interaction
+ * @param {Interaction} interaction - Discord button interaction
+ */
+async function handlePriceDelete(interaction) {
+  try {
+    await interaction.message.delete();
+  } catch (error) {
+    console.error("Error deleting message:", error);
+    // If we can't delete the message, at least acknowledge the interaction
+    await interaction.deferUpdate();
   }
 }
 
