@@ -139,9 +139,42 @@ async function handlePriceComparison(interaction) {
       return;
     }
 
-    // Create original data object with timestamp
+    // Extract original data from the message that triggered this interaction
+    const originalMessage = interaction.message;
+    if (!originalMessage) {
+      await interaction.editReply("🚫 Unable to find original message.");
+      return;
+    }
+
+    // Parse original price and market cap from the embed fields
+    const originalEmbed = originalMessage.embeds[0];
+    let originalPrice = null;
+    let originalMarketCap = null;
+
+    if (originalEmbed) {
+      originalEmbed.fields.forEach(field => {
+        if (field.name.includes("Price") && !field.name.includes("Change") && !field.name.includes("Multiplier")) {
+          // Extract price from code block
+          const priceMatch = field.value.match(/```[\s]*\$([0-9,.KMB]+)[\s]*```/);
+          if (priceMatch) {
+            originalPrice = parseFormattedNumber(priceMatch[1]);
+          }
+        }
+        if (field.name.includes("Market Cap") && !field.name.includes("Change") && !field.name.includes("Multiplier")) {
+          // Extract market cap from code block
+          const mcMatch = field.value.match(/```[\s]*\$([0-9,.KMB]+)[\s]*```/);
+          if (mcMatch) {
+            originalMarketCap = parseFormattedNumber(mcMatch[1]);
+          }
+        }
+      });
+    }
+
+    // Create original data object
     const originalData = {
       ...currentData,
+      priceUsd: originalPrice || currentData.priceUsd,
+      marketCap: originalMarketCap || currentData.marketCap,
       timestamp: originalTimestamp
     };
 
@@ -150,7 +183,7 @@ async function handlePriceComparison(interaction) {
     try {
       historicalData = await fetchHistoricalPrice(contractAddress, chainId, originalTimestamp);
     } catch (error) {
-      console.log("Historical data not available, using current data for comparison:", error.message);
+      console.log("Historical data not available:", error.message);
     }
 
     // If we have historical data, use it for more accurate original prices
