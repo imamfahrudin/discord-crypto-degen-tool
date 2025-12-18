@@ -75,7 +75,7 @@ function createTokenEmbed(token) {
   const chainName = chainId.toUpperCase();
 
   return new EmbedBuilder()
-    .setColor(process.env.PRIMARY_COLOR || "#00b0f4")
+    .setColor(parseInt(process.env.PRIMARY_COLOR) || 0x00b0f4)
     .setTitle(`${name} (${symbol}) - ${chainName}`)
     .setURL(url)
     .addFields(
