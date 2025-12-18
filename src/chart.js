@@ -1,11 +1,8 @@
 // Chart generation utilities using Chart.js and Canvas
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 
-// Import date adapter using createRequire to handle ES modules
-const { createRequire } = require('module');
-const { fileURLToPath } = require('url');
-const requireESM = createRequire(fileURLToPath(`file://${__filename}`));
-requireESM('chartjs-adapter-date-fns');
+// Import date adapter (CommonJS compatible)
+require('chartjs-adapter-moment');
 
 /**
  * Generates a candlestick chart from OHLC data
