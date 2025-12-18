@@ -10,29 +10,6 @@ const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder
 const fetch = require("node-fetch");
 require("dotenv").config();
 
-// Configuration constants
-const CONFIG = {
-  COLORS: {
-    PRIMARY: process.env.PRIMARY_COLOR || "#00b0f4",
-  },
-  DEXSCREENER_API: process.env.DEXSCREENER_API || "https://api.dexscreener.com/latest/dex/search",
-  MESSAGES: {
-    BOT_READY: process.env.BOT_READY_MESSAGE || "✅ Bot is online as",
-    TOKEN_NOT_FOUND: process.env.TOKEN_NOT_FOUND_MESSAGE || "🚫 Token not found.",
-    FETCH_ERROR: process.env.FETCH_ERROR_MESSAGE || "❌ Failed to fetch token data. Please try again later.",
-    COPY_CONTRACT: process.env.COPY_CONTRACT_MESSAGE || "📋 Contract Address:",
-  },
-  BUTTONS: {
-    COPY_CONTRACT: {
-      ID: process.env.COPY_CONTRACT_BUTTON_ID || "copy_ca",
-      LABEL: process.env.COPY_CONTRACT_BUTTON_LABEL || "📋 Copy Contract",
-    },
-  },
-  FOOTER: {
-    TEXT: process.env.FOOTER_TEXT || "DO YOUR OWN RESEARCH-ALWAYS!",
-  },
-};
-
 // Regex patterns
 const PATTERNS = {
   CONTRACT_ADDRESS: /\b(0x[a-fA-F0-9]{40}|[A-Za-z0-9]{32,44})\b/,
@@ -98,7 +75,7 @@ function createTokenEmbed(token) {
   const chainName = chainId.toUpperCase();
 
   return new EmbedBuilder()
-    .setColor(CONFIG.COLORS.PRIMARY)
+    .setColor(process.env.PRIMARY_COLOR || "#00b0f4")
     .setTitle(`${name} (${symbol}) - ${chainName}`)
     .setURL(url)
     .addFields(
@@ -120,7 +97,7 @@ function createTokenEmbed(token) {
       // Contract address
       { name: "🏷️ Contract Address", value: `\`\`\`${address}\`\`\`` }
     )
-    .setFooter({ text: CONFIG.FOOTER.TEXT });
+    .setFooter({ text: process.env.FOOTER_TEXT || "DO YOUR OWN RESEARCH-ALWAYS!" });
 }
 
 /**
@@ -130,7 +107,7 @@ function createTokenEmbed(token) {
  */
 async function fetchTokenData(query) {
   try {
-    const response = await fetch(`${CONFIG.DEXSCREENER_API}?q=${encodeURIComponent(query)}`);
+    const response = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(query)}`);
 
     if (!response.ok) {
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
@@ -166,7 +143,7 @@ async function handleTokenQuery(message) {
     const tokenData = await fetchTokenData(contractAddress);
 
     if (!tokenData) {
-      await message.reply(CONFIG.MESSAGES.TOKEN_NOT_FOUND);
+      await message.reply("🚫 Token not found.");
       return;
     }
 
@@ -175,8 +152,8 @@ async function handleTokenQuery(message) {
     // Create copy contract button
     const actionRow = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId(CONFIG.BUTTONS.COPY_CONTRACT.ID)
-        .setLabel(CONFIG.BUTTONS.COPY_CONTRACT.LABEL)
+        .setCustomId("copy_ca")
+        .setLabel("📋 Copy Contract")
         .setStyle(ButtonStyle.Primary)
     );
 
@@ -184,7 +161,7 @@ async function handleTokenQuery(message) {
 
   } catch (error) {
     console.error("Error processing token query:", error);
-    await message.reply(CONFIG.MESSAGES.FETCH_ERROR);
+    await message.reply("❌ Failed to fetch token data. Please try again later.");
   }
 }
 
@@ -195,7 +172,7 @@ async function handleTokenQuery(message) {
 async function handleButtonInteraction(interaction) {
   if (!interaction.isButton()) return;
 
-  if (interaction.customId === CONFIG.BUTTONS.COPY_CONTRACT.ID) {
+  if (interaction.customId === "copy_ca") {
     // Extract contract address from the embed
     const contractField = interaction.message.embeds[0].fields.find(
       field => field.name.includes("Contract Address")
@@ -204,7 +181,7 @@ async function handleButtonInteraction(interaction) {
     if (contractField) {
       const contractAddress = contractField.value.replace(/`/g, "").trim();
       await interaction.reply({
-        content: `${CONFIG.MESSAGES.COPY_CONTRACT} \`${contractAddress}\``,
+        content: `📋 Contract Address: \`${contractAddress}\``,
         ephemeral: true
       });
     }
@@ -222,7 +199,7 @@ const client = new Client({
 
 // Event handlers
 client.once("clientReady", () => {
-  console.log(`${CONFIG.MESSAGES.BOT_READY} ${client.user.tag}`);
+  console.log(`✅ Bot is online as ${client.user.tag}`);
 });
 
 client.on("messageCreate", async (message) => {
