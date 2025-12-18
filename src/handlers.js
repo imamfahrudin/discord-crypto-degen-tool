@@ -1,6 +1,8 @@
 // Event handlers for Discord bot
 const { createTokenEmbed, createPriceComparisonEmbed, createDexScreenerButton, createTokenActionRow, createPriceComparisonActionRow } = require("./embed");
 const { fetchTokenData, fetchHistoricalPrice, fetchCurrentPriceFromCoinGecko } = require("./api");
+const { fetchOHLCData, searchPoolsByToken } = require("./geckoterminal");
+const { generateCandlestickChart } = require("./chart");
 const { formatNumber, getMarketTrend, calculatePriceDifference, formatPriceDifference, formatMultiplier, parseFormattedNumber } = require("./utils");
 
 // Regex patterns
