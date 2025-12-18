@@ -78,7 +78,7 @@ async function handleTokenQuery(message) {
         console.log(`📊 No pools found for ${tokenData.baseToken.symbol} on ${network} (likely new/low-liquidity token) - setting status: ${chartStatusMessage}`);
       }
     } catch (chartError) {
-      chartStatusMessage = "📊 *Chart not available - data source error*";
+      chartStatusMessage = "📊 *Chart not available - insufficient historical data*";
       console.log(`📊 Chart generation failed, continuing without chart - setting status: ${chartStatusMessage}`);
       console.log(`📊 Chart error details: ${chartError.message}`);
       console.log(`📊 Token: ${tokenData.baseToken.symbol} (${contractAddress}) on ${tokenData.chainId}`);
