@@ -14,8 +14,12 @@ WORKDIR /app
 # Copy package files first for better caching
 COPY package*.json requirements.txt ./
 
-# Install Python dependencies
-RUN pip3 install --no-cache-dir -r requirements.txt
+# Install Python dependencies in virtual environment
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
+
+# Make sure virtual environment Python is used
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Install Node.js dependencies with retry logic
 RUN npm config set fetch-retry-mintimeout 20000 && \
