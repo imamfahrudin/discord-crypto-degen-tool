@@ -43,8 +43,8 @@ def generate_candlestick_chart(ohlc_data, token_name, symbol, timeframe, contrac
             'volume': 'Volume'
         })
 
-        # Limit to last 100 candles for better visibility
-        df_plot = df.tail(100).copy()
+        # Show all available candles (no artificial limit)
+        df_plot = df.copy()
 
         # Custom style with modern light theme (matching Python screening tool)
         mc = mpf.make_marketcolors(
@@ -75,9 +75,11 @@ def generate_candlestick_chart(ohlc_data, token_name, symbol, timeframe, contrac
                            panel_ratios=(7, 1),
                            ylabel='Price',
                            ylabel_lower='Volume',
-                           figsize=(16, 9),
+                           figsize=(24, 12),  # Much wider figure for all candles
+                           scale_padding=0.8,  # Reduce padding to fit more candles
+                           scale_width_adjustment=dict(candle=0.8),  # Make candles narrower to fit more
                            returnfig=True,
-                           warn_too_much_data=200)
+                           warn_too_much_data=500)
 
         ax = axes[0]
 
