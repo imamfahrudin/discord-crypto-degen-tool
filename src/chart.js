@@ -1,8 +1,10 @@
 // Chart generation utilities using Chart.js and Canvas
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 
-// Import and register Chart.js date adapter
-// require('chartjs-adapter-date-fns'); // Moved to dynamic import inside functions
+// Import date adapter using createRequire to handle ES modules
+const { createRequire } = require('module');
+const requireESM = createRequire(import.meta.url);
+requireESM('chartjs-adapter-date-fns');
 
 /**
  * Generates a candlestick chart from OHLC data
@@ -16,7 +18,6 @@ async function generateCandlestickChart(ohlcData, tokenName, symbol, timeframe) 
   try {
     // Dynamically import ES module components
     const { CandlestickController, CandlestickElement } = await import('chartjs-chart-financial');
-    await import('chartjs-adapter-date-fns');
 
     // Create chart canvas with font configuration
     const width = 800;
@@ -145,9 +146,6 @@ async function generateCandlestickChart(ohlcData, tokenName, symbol, timeframe) 
  */
 async function generatePriceChart(ohlcData, tokenName, symbol, timeframe) {
   try {
-    // Dynamically import date adapter
-    await import('chartjs-adapter-date-fns');
-
     const width = 800;
     const height = 400;
     const chartJSNodeCanvas = new ChartJSNodeCanvas({
