@@ -37,17 +37,17 @@ function createTokenEmbed(token) {
     .setTitle(`${name} (${symbol}) - ${chainName}`)
     .addFields(
       // Market metrics
-      { name: "🐋 Market Cap", value: `\`\`\`   $${formatNumber(marketCap)}   \`\`\``, inline: true },
-      { name: "🔐 Liquidity", value: `\`\`\`   $${formatNumber(liquidity?.usd)}   \`\`\``, inline: true },
-      { name: "⚖️ FDV", value: `\`\`\`   $${formatNumber(fdv)}   \`\`\``, inline: true },
+      { name: "🐋 Market Cap", value: `\`\`\`$${formatRawNumber(marketCap, 0)}\`\`\``, inline: true },
+      { name: "🔐 Liquidity", value: `\`\`\`$${formatRawNumber(liquidity?.usd, 0)}\`\`\``, inline: true },
+      { name: "⚖️ FDV", value: `\`\`\`$${formatRawNumber(fdv, 0)}\`\`\``, inline: true },
 
       // Price changes
       { name: "📈 1h Change", value: `\`\`\`   ${change1h}   \`\`\``, inline: true },
       { name: "💹 24h Change", value: `\`\`\`   ${change24h}   \`\`\``, inline: true },
-      { name: "🕒 Volume 24h", value: `\`\`\`   $${formatNumber(volume?.h24)}   \`\`\``, inline: true },
+      { name: "🕒 Volume 24h", value: `\`\`\`$${formatNumber(volume?.h24)}\`\`\``, inline: true },
 
       // Transaction data
-      { name: "📊 Price", value: `\`\`\`   $${formatNumber(priceUsd)}   \`\`\``, inline: true },
+      { name: "📊 Price", value: `\`\`\`$${formatRawNumber(priceUsd)}\`\`\``, inline: true },
       { name: "🧾 Buys / Sells", value: `\`\`\`   ${buys} / ${sells}   \`\`\``, inline: true },
       { name: "💸 Flow Trend", value: `\`\`\`   ${trend}   \`\`\``, inline: true },
 
