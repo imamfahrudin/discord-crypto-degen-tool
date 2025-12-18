@@ -7,14 +7,20 @@
     "start": "node bot.js",
     "dev": "nodemon bot.js"
   },
-  "keywords": ["discord", "bot", "crypto", "dexscreener"],
+  "keywords": [
+    "discord",
+    "bot",
+    "crypto",
+    "dexscreener"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "chartjs-node-canvas": "^4.1.6",
     "discord.js": "^14.14.1",
-    "node-fetch": "^2.7.0",
     "dotenv": "^16.3.1",
-    "chartjs-node-canvas": "^4.1.6"
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
