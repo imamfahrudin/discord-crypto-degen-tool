@@ -1,37 +1,8 @@
 // Chart generation utilities using Chart.js and Canvas
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 
-// Register date adapter for Chart.js
-const { register } = require('chart.js');
-const { parse, format } = require('date-fns');
-
-register({
-  id: 'date-fns',
-  beforeInit: function(chart) {
-    const options = chart.options;
-    if (options.scales && options.scales.x && options.scales.x.type === 'time') {
-      options.scales.x.adapters = {
-        date: {
-          parse: function(value) {
-            if (typeof value === 'number') {
-              return parse(value * 1000, 't', new Date()); // Unix timestamp
-            }
-            return parse(value, 'yyyy-MM-dd HH:mm:ss', new Date());
-          },
-          format: function(value, formatStr) {
-            if (formatStr === 'HH:mm') {
-              return format(value, 'HH:mm');
-            }
-            if (formatStr === 'MMM dd') {
-              return format(value, 'MMM dd');
-            }
-            return format(value, 'yyyy-MM-dd HH:mm');
-          }
-        }
-      };
-    }
-  }
-});
+// Import and register Chart.js date adapter
+require('chartjs-adapter-moment');
 
 /**
  * Generates a candlestick chart from OHLC data

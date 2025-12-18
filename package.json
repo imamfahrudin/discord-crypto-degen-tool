@@ -16,7 +16,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "chartjs-adapter-date-fns": "^3.0.0",
+    "chartjs-adapter-moment": "^1.0.1",
     "chartjs-node-canvas": "^4.1.6",
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
