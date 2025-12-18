@@ -17,7 +17,7 @@ async function testGeckoTerminal() {
       console.log(`Found pool: ${poolAddress}`);
 
       console.log('Fetching OHLC data...');
-      const ohlcData = await fetchOHLCData(network, poolAddress, '1h', 10);
+      const ohlcData = await fetchOHLCData(network, poolAddress, 'hour', 10);
 
       console.log(`Retrieved ${ohlcData.length} OHLC data points`);
       if (ohlcData.length > 0) {

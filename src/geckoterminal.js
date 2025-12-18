@@ -5,7 +5,7 @@ const fetch = require("node-fetch");
  * Fetches OHLC data from GeckoTerminal API
  * @param {string} network - Network name (e.g., 'eth', 'bsc', 'polygon')
  * @param {string} poolAddress - Pool contract address
- * @param {string} timeframe - Timeframe (e.g., '5m', '15m', '1h', '4h', '1d')
+ * @param {string} timeframe - Timeframe (e.g., 'minute', 'hour', 'day')
  * @param {number} limit - Number of data points (max 1000)
  * @returns {Promise<Array>} OHLC data array
  */
