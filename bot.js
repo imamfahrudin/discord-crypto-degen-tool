@@ -149,11 +149,11 @@ async function handleTokenQuery(message) {
 
     const embed = createTokenEmbed(tokenData);
 
-    // Create copy contract button
+    // Create DexScreener button
     const actionRow = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId("copy_ca")
-        .setLabel("📋 Copy Contract")
+        .setCustomId("dexscreener_link")
+        .setLabel("� View on DexScreener")
         .setStyle(ButtonStyle.Primary)
     );
 
@@ -172,16 +172,17 @@ async function handleTokenQuery(message) {
 async function handleButtonInteraction(interaction) {
   if (!interaction.isButton()) return;
 
-  if (interaction.customId === "copy_ca") {
-    // Extract contract address from the embed
-    const contractField = interaction.message.embeds[0].fields.find(
-      field => field.name.includes("Contract Address")
-    );
-
-    if (contractField) {
-      const contractAddress = contractField.value.replace(/`/g, "").trim();
+  if (interaction.customId === "dexscreener_link") {
+    // Get the DexScreener URL from the embed
+    const embedUrl = interaction.message.embeds[0]?.url;
+    if (embedUrl) {
       await interaction.reply({
-        content: `📋 Contract Address: \`${contractAddress}\``,
+        content: `🔍 View on DexScreener: ${embedUrl}`,
+        ephemeral: true
+      });
+    } else {
+      await interaction.reply({
+        content: "❌ Unable to find DexScreener link.",
         ephemeral: true
       });
     }
