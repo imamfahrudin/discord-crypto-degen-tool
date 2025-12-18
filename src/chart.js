@@ -3,7 +3,8 @@ const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 
 // Import date adapter using createRequire to handle ES modules
 const { createRequire } = require('module');
-const requireESM = createRequire(import.meta.url);
+const { fileURLToPath } = require('url');
+const requireESM = createRequire(fileURLToPath(`file://${__filename}`));
 requireESM('chartjs-adapter-date-fns');
 
 /**
