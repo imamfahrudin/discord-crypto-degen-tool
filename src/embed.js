@@ -170,18 +170,19 @@ function createTokenActionRow(url, contractAddress, chainId, timestamp) {
  * @param {string} chainId - Blockchain network
  * @param {number} originalTimestamp - Original timestamp from the first embed
  * @param {string} url - DexScreener URL
+ * @param {string} requesterId - User ID of the person who requested the price comparison
  * @returns {ActionRowBuilder} Action row with refresh and delete buttons
  */
-function createPriceComparisonActionRow(contractAddress, chainId, originalTimestamp, url) {
+function createPriceComparisonActionRow(contractAddress, chainId, originalTimestamp, url, requesterId) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setLabel("🔄 Refresh Price")
       .setStyle(ButtonStyle.Primary)
-      .setCustomId(`price_refresh_${contractAddress}_${chainId}_${originalTimestamp}`),
+      .setCustomId(`price_refresh_${contractAddress}_${chainId}_${originalTimestamp}_${requesterId}`),
     new ButtonBuilder()
       .setLabel("🗑️ Delete")
       .setStyle(ButtonStyle.Danger)
-      .setCustomId(`price_delete`),
+      .setCustomId(`price_delete_${requesterId}`),
     new ButtonBuilder()
       .setLabel("🔍 View on DexScreener")
       .setStyle(ButtonStyle.Link)

@@ -129,7 +129,7 @@ async function handleButtonInteraction(interaction) {
     return;
   }
 
-  if (customId === 'price_delete') {
+  if (customId.startsWith('price_delete_')) {
     await handlePriceDelete(interaction);
     return;
   }
@@ -214,7 +214,7 @@ async function handlePriceComparison(interaction) {
     const comparisonEmbed = createPriceComparisonEmbed(originalData, currentData, historicalData);
 
     // Create action row with refresh, delete, and DexScreener buttons
-    const actionRow = createPriceComparisonActionRow(contractAddress, chainId, originalTimestamp, currentData.url);
+    const actionRow = createPriceComparisonActionRow(contractAddress, chainId, originalTimestamp, currentData.url, interaction.user.id);
 
     await interaction.editReply({
       embeds: [comparisonEmbed],
@@ -236,6 +236,16 @@ async function handlePriceRefresh(interaction) {
   const contractAddress = parts[2];
   const chainId = parts[3];
   const originalTimestamp = parseInt(parts[4]);
+  const requesterId = parts[5]; // Extract requester ID from custom ID
+
+  // Check if the user clicking refresh is the same as the one who requested the price comparison
+  if (interaction.user.id !== requesterId) {
+    await interaction.reply({
+      content: "❌ Only the person who requested this price comparison can refresh it.",
+      ephemeral: true
+    });
+    return;
+  }
 
   await interaction.deferUpdate();
 
@@ -308,7 +318,7 @@ async function handlePriceRefresh(interaction) {
     const comparisonEmbed = createPriceComparisonEmbed(originalData, currentData, historicalData);
 
     // Create action row with refresh, delete, and DexScreener buttons
-    const actionRow = createPriceComparisonActionRow(contractAddress, chainId, originalTimestamp, currentData.url);
+    const actionRow = createPriceComparisonActionRow(contractAddress, chainId, originalTimestamp, currentData.url, interaction.user.id);
 
     await interaction.editReply({
       embeds: [comparisonEmbed],
@@ -326,6 +336,18 @@ async function handlePriceRefresh(interaction) {
  * @param {Interaction} interaction - Discord button interaction
  */
 async function handlePriceDelete(interaction) {
+  const parts = interaction.customId.split('_');
+  const requesterId = parts[2]; // Extract requester ID from custom ID
+
+  // Check if the user clicking delete is the same as the one who requested the price comparison
+  if (interaction.user.id !== requesterId) {
+    await interaction.reply({
+      content: "❌ Only the person who requested this price comparison can delete it.",
+      ephemeral: true
+    });
+    return;
+  }
+
   try {
     await interaction.message.delete();
   } catch (error) {
