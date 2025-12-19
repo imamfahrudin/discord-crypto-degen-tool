@@ -85,7 +85,7 @@ async function handleTokenQuery(message) {
     }
 
     const embed = createTokenEmbed(tokenData);
-    const actionRow = createTokenActionRow(tokenData.url, tokenData.baseToken.address, tokenData.chainId, Math.floor(Date.now() / 1000));
+    const actionRow = createTokenActionRow(tokenData.url, tokenData.baseToken.address, tokenData.chainId, Math.floor(Date.now() / 1000), message.author.id);
 
     // Add chart status message as a field below contract address if no chart available
     if (chartStatusMessage && !chartAttachment) {
@@ -146,8 +146,17 @@ async function handlePriceComparison(interaction) {
   const contractAddress = parts[2];
   const chainId = parts[3];
   const originalTimestamp = parseInt(parts[4]);
+  const requesterId = parts[5]; // Extract requester ID from custom ID
 
-  await interaction.deferReply();
+  // Check if the user clicking is the same as the one who requested the token info
+  // If requesterId is invalid/undefined, default to unauthorized (private response)
+  const isAuthorized = requesterId && interaction.user.id === requesterId;
+
+  if (isAuthorized) {
+    await interaction.deferReply(); // Public response
+  } else {
+    await interaction.deferReply({ ephemeral: true }); // Private response
+  }
 
   try {
     // Get current data
@@ -216,10 +225,17 @@ async function handlePriceComparison(interaction) {
     // Create action row with refresh, delete, and DexScreener buttons
     const actionRow = createPriceComparisonActionRow(contractAddress, chainId, originalTimestamp, currentData.url, interaction.user.id);
 
-    await interaction.editReply({
+    const replyOptions = {
       embeds: [comparisonEmbed],
       components: [actionRow]
-    });
+    };
+
+    // Add a note for unauthorized users
+    if (!isAuthorized) {
+      replyOptions.content = "🔒 *Private price comparison (only visible to you)*";
+    }
+
+    await interaction.editReply(replyOptions);
 
   } catch (error) {
     console.error("Error handling price comparison:", error);
@@ -239,7 +255,8 @@ async function handlePriceRefresh(interaction) {
   const requesterId = parts[5]; // Extract requester ID from custom ID
 
   // Check if the user clicking refresh is the same as the one who requested the price comparison
-  if (interaction.user.id !== requesterId) {
+  // If requesterId is invalid/undefined, deny access
+  if (!requesterId || interaction.user.id !== requesterId) {
     await interaction.reply({
       content: "❌ Only the person who requested this price comparison can refresh it.",
       ephemeral: true
@@ -340,7 +357,8 @@ async function handlePriceDelete(interaction) {
   const requesterId = parts[2]; // Extract requester ID from custom ID
 
   // Check if the user clicking delete is the same as the one who requested the price comparison
-  if (interaction.user.id !== requesterId) {
+  // If requesterId is invalid/undefined, deny access
+  if (!requesterId || interaction.user.id !== requesterId) {
     await interaction.reply({
       content: "❌ Only the person who requested this price comparison can delete it.",
       ephemeral: true

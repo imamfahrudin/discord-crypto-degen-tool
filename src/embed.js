@@ -149,9 +149,10 @@ function createDexScreenerButton(url) {
  * @param {string} contractAddress - Token contract address
  * @param {string} chainId - Blockchain network
  * @param {number} timestamp - Original timestamp
+ * @param {string} requesterId - User ID of the person who requested the token info
  * @returns {ActionRowBuilder} Action row with both buttons
  */
-function createTokenActionRow(url, contractAddress, chainId, timestamp) {
+function createTokenActionRow(url, contractAddress, chainId, timestamp, requesterId) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setLabel("🔍 View on DexScreener")
@@ -160,7 +161,7 @@ function createTokenActionRow(url, contractAddress, chainId, timestamp) {
     new ButtonBuilder()
       .setLabel("💰 Check Current Price")
       .setStyle(ButtonStyle.Secondary)
-      .setCustomId(`price_comparison_${contractAddress}_${chainId}_${timestamp}`)
+      .setCustomId(`price_comparison_${contractAddress}_${chainId}_${timestamp}_${requesterId}`)
   );
 }
 
