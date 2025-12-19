@@ -4,6 +4,7 @@ const { fetchTokenData, fetchHistoricalPrice, fetchCurrentPriceFromCoinGecko } =
 const { fetchOHLCData, searchPoolsByToken } = require("./geckoterminal");
 const { generateCandlestickChart } = require("./chart");
 const { formatNumber, getMarketTrend, calculatePriceDifference, formatPriceDifference, formatMultiplier, parseFormattedNumber } = require("./utils");
+const { MessageFlags } = require("discord.js");
 
 // Regex patterns
 const PATTERNS = {
@@ -259,7 +260,7 @@ async function handlePriceRefresh(interaction) {
   if (!requesterId || interaction.user.id !== requesterId) {
     await interaction.reply({
       content: "❌ Only the person who requested this price comparison can refresh it.",
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
     return;
   }
@@ -361,7 +362,7 @@ async function handlePriceDelete(interaction) {
   if (!requesterId || interaction.user.id !== requesterId) {
     await interaction.reply({
       content: "❌ Only the person who requested this price comparison can delete it.",
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
     return;
   }
