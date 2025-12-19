@@ -4,7 +4,7 @@ const { fetchTokenData, fetchHistoricalPrice, fetchCurrentPriceFromCoinGecko } =
 const { fetchOHLCData, searchPoolsByToken } = require("./geckoterminal");
 const { generateCandlestickChart } = require("./chart");
 const { formatNumber, getMarketTrend, calculatePriceDifference, formatPriceDifference, formatMultiplier, parseFormattedNumber } = require("./utils");
-const { MessageFlags } = require("discord.js");
+const { MessageFlags, AttachmentBuilder } = require("discord.js");
 
 // Regex patterns
 const PATTERNS = {
@@ -66,10 +66,9 @@ async function handleTokenQuery(message) {
             network
           );
 
-          chartAttachment = {
-            attachment: chartBuffer,
+          chartAttachment = new AttachmentBuilder(chartBuffer, {
             name: `${tokenData.baseToken.symbol}_chart.png`
-          };
+          });
         } else {
           chartStatusMessage = "📊 *Chart not available - insufficient trading data*";
           console.log(`📊 No OHLC data available for ${tokenData.baseToken.symbol} on ${network} - setting status: ${chartStatusMessage}`);
