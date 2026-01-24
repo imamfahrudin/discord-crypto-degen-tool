@@ -35,5 +35,33 @@ client.on("interactionCreate", async (interaction) => {
   await handleButtonInteraction(interaction);
 });
 
-// Login and start the bot
-client.login(process.env.TOKEN);
+// Login and start the bot with retry logic for rate limiting
+async function loginWithRetry(maxRetries = 5, initialDelay = 60000) {
+  let attempt = 0;
+  let delay = initialDelay;
+
+  while (attempt < maxRetries) {
+    try {
+      console.log(`🚀 Starting Discord bot... (attempt ${attempt + 1}/${maxRetries})`);
+      await client.login(process.env.TOKEN);
+      break; // Success, exit loop
+    } catch (error) {
+      if (error.httpStatus === 429) {
+        console.log(`⚠️ Rate limited (attempt ${attempt + 1}/${maxRetries}). Retrying in ${delay / 1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay *= 2; // Exponential backoff
+        attempt++;
+      } else {
+        console.error(`❌ HTTP Error: ${error}`);
+        throw error;
+      }
+    }
+  }
+
+  if (attempt >= maxRetries) {
+    console.error(`❌ Failed to start bot after ${maxRetries} attempts due to rate limiting.`);
+    process.exit(1);
+  }
+}
+
+loginWithRetry();
