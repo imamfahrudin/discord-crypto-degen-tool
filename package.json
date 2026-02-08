@@ -4,8 +4,8 @@
   "description": "A Discord bot that fetches and displays cryptocurrency token information from DexScreener API",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js",
-    "dev": "nodemon bot.js"
+    "start": "node --no-warnings bot.js",
+    "dev": "nodemon --no-warnings bot.js"
   },
   "keywords": [
     "discord",
