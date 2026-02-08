@@ -32,12 +32,16 @@ async function handleTokenQuery(message) {
       return;
     }
 
-    // Fetch coin image in parallel
-    let imageUrl = null;
-    try {
-      imageUrl = await fetchCoinImage(contractAddress, tokenData.chainId);
-    } catch (imageError) {
-      console.log(`🖼️ Failed to fetch coin image: ${imageError.message}`);
+    // Get coin image - prioritize DexScreener's built-in image
+    let imageUrl = tokenData?.info?.imageUrl || null;
+    
+    // Fallback to CoinGecko if DexScreener doesn't have an image
+    if (!imageUrl) {
+      try {
+        imageUrl = await fetchCoinImage(contractAddress, tokenData.chainId);
+      } catch (imageError) {
+        console.log(`🖼️ Failed to fetch coin image: ${imageError.message}`);
+      }
     }
 
     // Try to generate chart automatically
