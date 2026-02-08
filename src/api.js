@@ -152,8 +152,57 @@ async function fetchCurrentPriceFromCoinGecko(contractAddress, chainId) {
   }
 }
 
+/**
+ * Fetches coin image URL from CoinGecko API
+ * @param {string} contractAddress - Token contract address
+ * @param {string} chainId - Blockchain network
+ * @returns {Promise<string|null>} Image URL or null if not found
+ */
+async function fetchCoinImage(contractAddress, chainId) {
+  try {
+    // Map chainId to CoinGecko platform ID
+    const platformMap = {
+      'ethereum': 'ethereum',
+      'bsc': 'binance-smart-chain',
+      'polygon': 'polygon-pos',
+      'arbitrum': 'arbitrum-one',
+      'optimism': 'optimistic-ethereum',
+      'base': 'base',
+      'avalanche': 'avalanche',
+      'solana': 'solana'
+    };
+
+    const platform = platformMap[chainId.toLowerCase()];
+    if (!platform) {
+      console.log(`Unsupported chain: ${chainId}`);
+      return null;
+    }
+
+    const url = `https://api.coingecko.com/api/v3/coins/${platform}/contract/${contractAddress}`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.log(`Token not found on CoinGecko for image: ${contractAddress}`);
+        return null;
+      }
+      throw new Error(`CoinGecko API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    return data.image?.large || data.image?.small || null;
+
+  } catch (error) {
+    console.log(`🖼️ CoinGecko image API error for ${contractAddress}:`, error.message);
+    return null;
+  }
+}
+
 module.exports = {
   fetchTokenData,
   fetchHistoricalPrice,
   fetchCurrentPriceFromCoinGecko,
+  fetchCoinImage,
 };

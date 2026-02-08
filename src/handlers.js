@@ -1,6 +1,6 @@
 // Event handlers for Discord bot
 const { createTokenEmbed, createPriceComparisonEmbed, createDexScreenerButton, createTokenActionRow, createPriceComparisonActionRow } = require("./embed");
-const { fetchTokenData, fetchHistoricalPrice, fetchCurrentPriceFromCoinGecko } = require("./api");
+const { fetchTokenData, fetchHistoricalPrice, fetchCurrentPriceFromCoinGecko, fetchCoinImage } = require("./api");
 const { fetchOHLCData, searchPoolsByToken } = require("./geckoterminal");
 const { generateCandlestickChart } = require("./chart");
 const { formatNumber, getMarketTrend, calculatePriceDifference, formatPriceDifference, formatMultiplier, parseFormattedNumber } = require("./utils");
@@ -30,6 +30,14 @@ async function handleTokenQuery(message) {
     if (!tokenData) {
       await message.reply("🚫 Token not found.");
       return;
+    }
+
+    // Fetch coin image in parallel
+    let imageUrl = null;
+    try {
+      imageUrl = await fetchCoinImage(contractAddress, tokenData.chainId);
+    } catch (imageError) {
+      console.log(`🖼️ Failed to fetch coin image: ${imageError.message}`);
     }
 
     // Try to generate chart automatically
@@ -86,6 +94,11 @@ async function handleTokenQuery(message) {
 
     const embed = createTokenEmbed(tokenData);
     const actionRow = createTokenActionRow(tokenData.url, tokenData.baseToken.address, tokenData.chainId, Math.floor(Date.now() / 1000), message.author.id);
+
+    // Set coin image as thumbnail if available
+    if (imageUrl) {
+      embed.setThumbnail(imageUrl);
+    }
 
     // Add chart status message as a field below contract address if no chart available
     if (chartStatusMessage && !chartAttachment) {
