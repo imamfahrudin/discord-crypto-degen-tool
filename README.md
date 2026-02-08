@@ -14,6 +14,7 @@ A Discord bot that automatically detects cryptocurrency contract addresses in me
 - 📋 Copy contract address button
 - 💹 Real-time data from DexScreener + GeckoTerminal
 - 🌐 Multi-chain support
+- 🔒 Optional Cloudflare WARP integration for secure DNS over HTTPS
 
 ## 📋 Prerequisites
 
@@ -30,6 +31,7 @@ A Discord bot that automatically detects cryptocurrency contract addresses in me
    # Copy the example env file and edit with your Discord bot token
    cp .env.example .env
    nano .env  # Add TOKEN=your_discord_bot_token_here
+   # Optionally set USE_WARP=true for Cloudflare WARP VPN integration
    ```
 3. **Build and run with Docker Compose**
    ```bash
@@ -79,14 +81,36 @@ Price charts are **automatically generated and included** in the embed when a to
 
 *Note: Charts are generated in the background and may take a few seconds to appear. If chart generation fails, the embed will still show all other token information.*
 
-## 🐳 Docker Commands
+## � Cloudflare WARP Integration
+
+This project includes optional Cloudflare WARP VPN integration for secure DNS over HTTPS connections.
+
+### To Enable WARP:
+1. Set `USE_WARP=true` in your `.env` file
+2. The Docker container will automatically connect to WARP on startup
+3. Requires privileged container permissions (already configured in docker-compose.yml)
+
+### Benefits:
+- Enhanced privacy with DNS over HTTPS
+- Improved connection reliability for crypto APIs
+- Automatic retry logic for connection establishment
+
+*Note: WARP is disabled by default. Set `USE_WARP=false` or omit it to run without VPN.*
+
+## �🐳 Docker Commands
 
 - Start: `docker-compose up -d`
 - Stop: `docker-compose down`
 - Logs: `docker-compose logs -f`
 - Rebuild: `docker-compose up -d --build`
 
-## 🐛 Troubleshooting
+### WARP Connection Issues
+
+If WARP fails to connect:
+1. Check container logs: `docker-compose logs -f`
+2. Ensure `USE_WARP=true` is set in `.env`
+3. Verify Docker has necessary privileges (privileged mode is enabled)
+4. WARP may take up to 30 seconds to establish connection
 
 ### Docker Build Issues
 
